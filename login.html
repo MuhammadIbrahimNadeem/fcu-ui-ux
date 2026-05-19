@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SecureBank Pakistan — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=VT323&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #1a56db;
+      --blue-dark: #1346b8;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f9fafb;
+      --white: #ffffff;
+      --red: #ff1a1a;
+    }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); }
+
+    /* ── all screens hidden by default ── */
+    .screen { display: none; width: 100%; min-height: 100vh; animation: fadeIn .3s ease-out; }
+    .screen.active { display: flex; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 1 — ULTRA MINIMAL LOGIN (centered card, nothing else)
+    ════════════════════════════════════════════════════════════ */
+    #s1 {
+      align-items: center; justify-content: center;
+      background: #ffffff;
+      min-height: 100vh;
+    }
+    .s1-card {
+      width: 100%; max-width: 380px;
+      padding: 0 24px;
+    }
+    .s1-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 36px;
+    }
+    .s1-logo-mark {
+      width: 34px; height: 34px; background: var(--blue);
+      border-radius: 8px; display: grid; place-items: center;
+      color: #fff; font-weight: 800; font-size: 16px; letter-spacing: -1px;
+    }
+    .s1-logo-name { font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -.3px; }
+    .s1-logo-name span { color: var(--muted); font-weight: 400; }
+    .s1-h { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: -.4px; }
+    .s1-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+
+    .f { margin-bottom: 16px; }
+    .f label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+    .f input {
+      width: 100%; padding: 10px 13px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; color: var(--text); font-family: inherit;
+      outline: none; transition: border-color .15s, box-shadow .15s; background: #fff;
+    }
+    .f input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,86,219,.1); }
+    .f input::placeholder { color: #9ca3af; }
+
+    .s1-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; font-size: 13px;
+    }
+    .s1-row label { display: flex; align-items: center; gap: 6px; color: var(--muted); cursor: pointer; }
+    .s1-row a { color: var(--blue); text-decoration: none; font-size: 13px; }
+    .s1-row a:hover { text-decoration: underline; }
+
+    .btn-blue {
+      width: 100%; padding: 11px; background: var(--blue);
+      color: #fff; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: background .15s; letter-spacing: .1px;
+    }
+    .btn-blue:hover { background: var(--blue-dark); }
+
+    .s1-divider { display: flex; align-items: center; gap: 10px; margin: 18px 0; }
+    .s1-divider::before, .s1-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .s1-divider span { font-size: 12px; color: var(--muted); }
+
+    .s1-signup { text-align: center; font-size: 13px; color: var(--muted); }
+    .s1-signup a { color: var(--blue); text-decoration: none; }
+
+    .s1-footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      padding: 14px 24px;
+      display: flex; justify-content: center; gap: 20px;
+      font-size: 12px; color: #9ca3af;
+    }
+    .s1-footer a { color: #9ca3af; text-decoration: none; }
+    .s1-footer a:hover { color: var(--muted); }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 2 — OTP  (clean but with subtle wrongness)
+    ════════════════════════════════════════════════════════════ */
+    #s2 {
+      align-items: center; justify-content: center;
+      background: #ffffff; flex-direction: column;
+    }
+    .s2-card {
+      width: 100%; max-width: 400px; padding: 0 24px;
+    }
+    .s2-back {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; color: var(--blue); cursor: pointer; margin-bottom: 28px;
+    }
+    .s2-h { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -.4px; }
+    .s2-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+    .s2-desc strong { color: var(--text); }
+
+    /* the "convenience" OTP reveal — looks like a notification */
+    .otp-reveal {
+      display: flex; align-items: center; gap: 10px;
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      border-radius: 8px; padding: 11px 14px; margin-bottom: 20px;
+      font-size: 13px; color: #1e40af;
+    }
+    .otp-reveal .otp-code {
+      font-family: 'SF Mono', 'Fira Code', monospace; font-size: 20px;
+      font-weight: 700; letter-spacing: 5px; color: var(--text);
+    }
+    .otp-reveal .otp-note { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .timer-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #fefce8; border: 1px solid #fde047;
+      border-radius: 20px; padding: 4px 10px; font-size: 12px; color: #854d0e;
+      margin-bottom: 20px;
+    }
+
+    .otp-boxes { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
+    .otp-boxes input {
+      width: 52px; height: 58px; text-align: center;
+      font-size: 24px; font-weight: 600; color: var(--text);
+      border: 1.5px solid var(--border); border-radius: 8px;
+      outline: none; font-family: inherit;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .otp-boxes input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,86,219,.1); }
+    /* subtle: box 4 is barely rotated */
+    .otp-boxes input:nth-child(4) { transform: rotate(0.6deg); }
+
+    .otp-hint { font-size: 11px; color: #9ca3af; text-align: center; margin-bottom: 24px; }
+
+    .s2-resend { text-align: center; font-size: 13px; color: var(--muted); margin-top: 14px; }
+    .s2-resend span { color: var(--blue); cursor: pointer; text-decoration: underline; }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 3 — WINDOWS BSOD (first shock)
+    ════════════════════════════════════════════════════════════ */
+    #s3 {
+      background: #0078d4; flex-direction: column;
+      align-items: flex-start; justify-content: center;
+      padding: 8vw 10vw; cursor: default;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .bs-face { font-size: clamp(60px, 10vw, 110px); color: #fff; margin-bottom: 28px; line-height: 1; }
+    .bs-h1 { font-size: clamp(20px, 3.5vw, 42px); font-weight: 300; color: #fff; line-height: 1.25; max-width: 600px; margin-bottom: 24px; }
+    .bs-body { font-size: clamp(13px, 1.5vw, 16px); color: #fff; line-height: 1.8; margin-bottom: 22px; max-width: 560px; }
+    .bs-prog-track { width: 180px; height: 5px; background: rgba(255,255,255,.3); border-radius: 3px; margin: 18px 0 8px; overflow: hidden; }
+    .bs-prog-fill { height: 100%; background: #fff; width: 0; transition: width .25s; }
+    .bs-pct { color: #fff; font-size: 13px; margin-bottom: 18px; }
+    .bs-code { font-size: 12px; color: rgba(255,255,255,.7); line-height: 2; }
+    .bs-qr {
+      width: 80px; height: 80px; background: #fff; margin: 18px 0;
+      display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); gap: 2px; padding: 8px;
+    }
+    .bs-qr span { background: #000; border-radius: 1px; }
+    .bs-qr span.w { background: #fff; }
+    .bs-anykey { margin-top: 36px; color: rgba(255,255,255,.55); font-size: 13px; animation: blink 1.6s infinite; display: none; }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 4 — HELL
+    ════════════════════════════════════════════════════════════ */
+    #s4 {
+      flex-direction: column; background: #04060c;
+      color: #e5e7eb; position: relative; overflow: hidden;
+    }
+    #matrix {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .4;
+    }
+    #s4::after {
+      content: ''; position: fixed; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+      z-index: 1;
+    }
+    .hell-ticker-top {
+      position: relative; z-index: 10;
+      background: linear-gradient(90deg,#39ff14,#ff1493,#ffff00,#00ffff,#ff1493,#39ff14);
+      background-size: 400% 100%; animation: bgSlide 4s linear infinite;
+      color: #000; font-family: 'Comic Neue', cursive; font-weight: 700;
+      font-size: 12px; padding: 5px 0; overflow: hidden; white-space: nowrap;
+      border-bottom: 2px ridge #ff0000;
+    }
+    .hell-ticker-top span {
+      display: inline-block; padding-left: 100%;
+      animation: tickScroll 32s linear infinite;
+    }
+    @keyframes tickScroll { from{transform:translateX(0)} to{transform:translateX(-100%)} }
+    @keyframes bgSlide { 0%{background-position:0%} 100%{background-position:400%} }
+
+    .hell-scroll {
+      position: relative; z-index: 5;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 18px 16px 90px; flex: 1; overflow-y: auto; overflow-x: hidden;
+    }
+    /* TITLE */
+    .h-title {
+      font-family: 'VT323', monospace; font-size: clamp(36px,6vw,56px);
+      letter-spacing: 14px; text-align: center; color: #ff1a1a;
+      text-shadow: 0 0 8px #ff1a1a, 0 0 22px #ff1a1a, 0 0 50px rgba(255,26,26,.4);
+      animation: neonFlick 3.2s infinite; margin: 8px 0 4px; padding-left: 14px;
+    }
+    @keyframes neonFlick {
+      0%,100%{opacity:1;} 43%{opacity:.9;} 44%{opacity:.25;} 46%{opacity:1;}
+      91%{opacity:1;} 92%{opacity:.4;} 93%{opacity:1;}
+    }
+    .h-sub {
+      font-family: 'VT323', monospace; font-size: 14px; color: #8b8fa3;
+      text-align: center; margin-bottom: 14px; letter-spacing: 1px;
+    }
+    .h-sub .ip { color: #ff7a7a; }
+    .h-sub .desi { color: #39ff14; font-family: 'Comic Neue', cursive; font-weight: 700; }
+
+    /* METERS */
+    .meters {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 6px;
+      width: 100%; max-width: 620px; margin-bottom: 12px;
+    }
+    .meter {
+      background: #0a0006; border: 1px solid #ff1a1a;
+      padding: 5px 8px; font-family: 'VT323', monospace; font-size: 11px; color: #ff8a8a;
+    }
+    .m-lbl { display: flex; justify-content: space-between; margin-bottom: 3px; }
+    .m-bar { height: 5px; background: #1f0008; overflow: hidden; }
+    .m-fill { height: 100%; width: 0%; transition: width .4s; }
+    .m-rage .m-fill  { background: linear-gradient(90deg,#39ff14,#ffff00,#ff6a00,#ff0000); }
+    .m-dmg  .m-fill  { background: linear-gradient(90deg,#00ffff,#ff00ff,#ff0000); }
+    .m-hope .m-fill  { background: linear-gradient(90deg,#b4b9ff,#6366f1,#312e81); }
+
+    /* HELL CARD */
+    .hell-card {
+      width: 100%; max-width: 620px;
+      background: rgba(8,0,8,.85);
+      border: 1px solid #2a0a14;
+      box-shadow: 0 0 0 1px rgba(255,26,26,.35), 0 0 30px rgba(255,26,26,.25), inset 0 0 30px rgba(0,0,0,.55);
+      padding: 26px 22px 20px; position: relative;
+    }
+    .hell-card::before {
+      content: '// SOUL_VERIFICATION_PROTOCOL — DO NOT TRUST';
+      position: absolute; top: -9px; left: 12px; background: #04060c; padding: 0 7px;
+      font-family: 'VT323', monospace; color: #ff5252; font-size: 11px; letter-spacing: 1px;
+    }
+
+    /* EYE */
+    .eye {
+      position: absolute; top: 10px; right: 10px;
+      width: 48px; height: 48px; background: #fff;
+      border-radius: 50%; display: grid; place-items: center;
+      box-shadow: 0 0 14px rgba(255,26,26,.65);
+    }
+    .pupil {
+      width: 22px; height: 22px; background: #050505;
+      border-radius: 50%; position: relative; transition: transform .07s;
+    }
+    .pupil::after {
+      content: ''; position: absolute; top: 4px; left: 4px;
+      width: 7px; height: 7px; background: #ff1a1a; border-radius: 50%;
+      box-shadow: 0 0 5px #ff1a1a;
+    }
+
+    /* FIELDS */
+    .h-field { margin-bottom: 14px; }
+    .h-field label {
+      display: block; font-size: 12px; margin-bottom: 4px;
+      color: #ff5252; font-family: 'VT323', monospace; letter-spacing: 1px;
+    }
+    .h-field label .micro {
+      display: block; font-size: 9px; color: #6b7280; letter-spacing: 0;
+      font-family: 'VT323', monospace; margin-top: 1px;
+    }
+    .h-field input, .h-field select {
+      width: 100%; padding: 9px 11px;
+      background: #0a0006; color: #fde047;
+      border: 1px solid #ff1a1a; border-radius: 0;
+      font-family: 'VT323', monospace; font-size: 17px; outline: none;
+      box-shadow: inset 0 0 5px rgba(255,26,26,.2); letter-spacing: 1px;
+    }
+    .h-field input:focus, .h-field select:focus {
+      border-color: #fff; box-shadow: 0 0 8px #ff1a1a, inset 0 0 5px rgba(255,26,26,.35);
+    }
+    .h-field input::placeholder { color: #6b1a1a; font-style: italic; }
+    .h-err { color: #ff5252; font-size: 11px; margin-top: 3px; font-family: 'VT323', monospace; display: none; }
+    .h-err.show { display: block; }
+
+    /* PASSWORD RULES TICKER */
+    .pw-ticker {
+      background: #0a0006; border: 1px solid #ff1a1a;
+      height: 26px; overflow: hidden; position: relative; margin-bottom: 14px;
+    }
+    .pw-ticker-inner {
+      font-family: 'VT323', monospace; font-size: 12px; color: #ff8a8a;
+      white-space: nowrap; position: absolute; top: 5px;
+      animation: tickRules 22s linear infinite; letter-spacing: 1px;
+    }
+    @keyframes tickRules { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
+
+    /* CAPTCHA with real images */
+    .captcha-wrap {
+      background: rgba(0,0,0,.5); border: 1px solid #ff1a1a; padding: 10px; margin-bottom: 14px;
+    }
+    .cap-badge {
+      display: inline-block; background: #ff1493; color: #ffff00;
+      font-family: 'Comic Neue', cursive; font-weight: 700; font-size: 10px;
+      padding: 2px 7px; margin-bottom: 5px;
+    }
+    .cap-q { font-family: 'VT323', monospace; font-size: 12px; color: #ff8a8a; margin-bottom: 7px; }
+    .cap-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 3px; }
+    .cap-tile {
+      aspect-ratio: 1; background: #100008; cursor: pointer;
+      border: 2px solid #2a0a14; position: relative; overflow: hidden;
+      transition: border-color .15s; user-select: none;
+    }
+    .cap-tile img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      pointer-events: none;
+      /* random filters applied via JS */
+    }
+    .cap-tile .tlbl {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,.65); color: #fff;
+      font-size: 9px; font-family: 'VT323', monospace; text-align: center; padding: 2px;
+      letter-spacing: .5px;
+    }
+    .cap-tile:hover { border-color: #ff1a1a; }
+    .cap-tile.picked { border-color: #22c55e; }
+    .cap-tile.picked img { filter: sepia(1) hue-rotate(80deg) !important; }
+    .cap-tile.dodge { transition: transform .12s; }
+
+    /* WEBCAM */
+    .cam-wrap {
+      background: #000; border: 2px solid #ff1a1a;
+      margin-bottom: 14px; position: relative; overflow: hidden;
+      aspect-ratio: 16/9; max-height: 190px;
+    }
+    #camFeed { width: 100%; height: 100%; object-fit: cover; display: block; filter: hue-rotate(180deg) saturate(1.3); }
+    .cam-hud {
+      position: absolute; inset: 0; pointer-events: none;
+      display: flex; flex-direction: column; justify-content: space-between; padding: 7px;
+    }
+    .cam-rec {
+      display: flex; align-items: center; gap: 5px;
+      font-family: 'VT323', monospace; font-size: 13px; color: #ff1a1a;
+    }
+    .rec-dot { width: 7px; height: 7px; background: #ff1a1a; border-radius: 50%; animation: blink 1s infinite; }
+    .cam-bottom { font-family: 'VT323', monospace; font-size: 10px; color: rgba(255,26,26,.8); letter-spacing: .5px; }
+    /* scan lines on cam */
+    .cam-wrap::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(0,255,0,.03) 0 1px, transparent 1px 2px);
+    }
+    .cam-blocked {
+      position: absolute; inset: 0; background: #060006;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    }
+    .cam-blocked span { font-family: 'VT323', monospace; font-size: 13px; color: #ff5252; text-align: center; padding: 0 12px; }
+    .cam-blocked button {
+      background: #ff1a1a; color: #fff; border: none; padding: 7px 16px;
+      font-family: 'VT323', monospace; font-size: 13px; cursor: pointer;
+    }
+
+    /* AGREE + BUTTONS */
+    .agree-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; font-size: 12px; font-family: 'VT323', monospace;
+    }
+    .agree-row label { color: #9ca3af; display: flex; gap: 6px; align-items: center; cursor: pointer; }
+    .agree-row input[type=checkbox] {
+      appearance: none; width: 13px; height: 13px;
+      border: 1px solid #4b5563; background: #1f2937; opacity: .3; cursor: pointer;
+    }
+    .agree-row input[type=checkbox]:checked { background: #ff1a1a; opacity: 1; box-shadow: 0 0 5px #ff1a1a; }
+    .micro-lnk { font-size: 11px; color: #b4b9ff; text-decoration: underline; cursor: pointer; font-family: 'VT323', monospace; }
+
+    .desi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 8px; }
+    .desi-grid button {
+      padding: 9px 5px;
+      background: linear-gradient(180deg,#2a0000,#5a0000); color: #fff;
+      border: 1px solid #ff1a1a; font-family: 'VT323', monospace; font-size: 14px;
+      letter-spacing: 2px; cursor: pointer;
+    }
+    .desi-grid button:hover { box-shadow: 0 0 14px #ff1a1a; }
+
+    .h-actions { display: flex; gap: 7px; align-items: stretch; margin-top: 12px; position: relative; }
+    .btn-hell {
+      flex: 1; padding: 11px; border-radius: 0; border: 1px solid;
+      font-family: 'VT323', monospace; font-size: 17px; cursor: pointer; letter-spacing: 3px;
+      background: linear-gradient(180deg,#2a0000,#5a0000); color: #fff; border-color: #ff1a1a;
+      box-shadow: 0 0 12px rgba(255,26,26,.45);
+    }
+    .btn-hell:hover { box-shadow: 0 0 22px #ff1a1a; }
+    .btn-ghost-hell { background: transparent !important; color: #6b7280; border-color: transparent !important; font-size: 10px; flex: none; padding: 11px 8px; box-shadow: none !important; }
+    .btn-ghost-hell:hover { color: #b4b9ff; }
+
+    .runaway {
+      position: absolute; bottom: -52px; right: 0;
+      padding: 5px 11px; background: #0a0006; color: #ff8a8a;
+      border: 1px solid #ff1a1a; font-size: 11px; cursor: pointer;
+      font-family: 'VT323', monospace; letter-spacing: 1px;
+    }
+
+    .prog-reg { margin-top: 16px; height: 7px; background: #1f0008; border: 1px solid #ff1a1a; overflow: hidden; position: relative; }
+    .prog-reg::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg,#ff1a1a,#fff); width: 100%;
+      animation: regress 5s linear infinite;
+    }
+    @keyframes regress { 0%{width:100%;} 100%{width:0%;} }
+    .prog-lbl { font-size: 10px; color: #6b7280; font-family: 'VT323', monospace; margin-top: 3px; }
+
+    /* bottom ticker */
+    .hell-ticker-bot {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,.9); color: #ff5252;
+      font-family: 'VT323', monospace; padding: 5px 0;
+      overflow: hidden; white-space: nowrap; border-top: 1px solid #ff1a1a;
+      z-index: 40; font-size: 12px;
+    }
+    .hell-ticker-bot span { display: inline-block; padding-left: 100%; animation: tickScroll 26s linear infinite; }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 5 — FAKE SUCCESS
+    ════════════════════════════════════════════════════════════ */
+    #s5 {
+      align-items: center; justify-content: center;
+      background: linear-gradient(135deg,#39ff14,#ffff00,#ff1493,#00ffff);
+      background-size: 400% 400%; animation: bgPulse 2s infinite;
+    }
+    @keyframes bgPulse { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+    .s5-box {
+      text-align: center; padding: 60px 40px;
+      border: 8px solid #ff0000; background: rgba(255,255,255,.15);
+      backdrop-filter: blur(6px);
+    }
+    .s5-box h1 {
+      font-family: 'Comic Neue', cursive; font-size: clamp(32px,6vw,52px); font-weight: 900;
+      color: #000; text-shadow: 3px 3px 0 #fff, 6px 6px 0 #ff0000; margin-bottom: 14px;
+    }
+    .s5-spin { font-size: 56px; display: inline-block; animation: spin 1s linear infinite; margin: 12px 0; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .s5-box p { font-family: 'Comic Neue', cursive; font-size: 20px; font-weight: 700; color: #000; }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 6 — BSOD v2
+    ════════════════════════════════════════════════════════════ */
+    #s6 {
+      background: #0078d4; flex-direction: column;
+      align-items: flex-start; justify-content: center;
+      padding: 8vw 10vw; cursor: default;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 7 — FINAL DASHBOARD
+    ════════════════════════════════════════════════════════════ */
+    #s7 {
+      background: #04060c; flex-direction: column;
+      align-items: center; justify-content: center; padding: 40px 20px; position: relative;
+    }
+    #matrix2 { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .3; }
+    .final-card {
+      background: rgba(8,0,8,.92); border: 2px solid #ff1a1a;
+      box-shadow: 0 0 40px rgba(255,26,26,.5);
+      padding: 44px 32px; text-align: center; max-width: 460px; width: 100%; position: relative; z-index: 2;
+    }
+    .f-skull { font-size: 72px; animation: spin 5s linear infinite; display: inline-block; margin-bottom: 12px; }
+    .f-title { font-family: 'VT323', monospace; font-size: 34px; color: #ff1a1a; text-shadow: 0 0 12px #ff1a1a; letter-spacing: 4px; margin-bottom: 12px; }
+    .f-msg { font-family: 'VT323', monospace; font-size: 19px; color: #d6d9e0; margin-bottom: 22px; line-height: 1.6; }
+    .f-msg b { color: #39ff14; font-family: 'Comic Neue', cursive; }
+    .f-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .f-btns button { padding: 13px; font-family: 'VT323', monospace; font-size: 17px; letter-spacing: 2px; border: 1px solid; cursor: pointer; }
+    .fb1{background:#1f0008;color:#ff5252;border-color:#ff1a1a;}
+    .fb2{background:#001f1f;color:#00ffff;border-color:#00ffff;}
+    .fb3{background:#1f1f00;color:#ffff00;border-color:#ffff00;}
+    .fb4{background:#1f001f;color:#ff1493;border-color:#ff1493;}
+    .f-btns button:hover { transform: scale(1.02); }
+    .f-stats { margin-top: 18px; font-family: 'VT323', monospace; font-size: 12px; color: #6b7280; }
+
+    /* ════════════════════════════════════════════════════════════
+       OVERLAYS
+    ════════════════════════════════════════════════════════════ */
+
+    /* Desi toast */
+    .d-toast {
+      position: fixed; top: 80px; right: 20px;
+      background: #ffff00; color: #000; padding: 9px 13px;
+      border: 3px solid #ff0000; font-family: 'Comic Neue', cursive; font-weight: 700;
+      font-size: 15px; box-shadow: 5px 5px 0 #ff1493; z-index: 300;
+      max-width: 260px; display: none;
+    }
+    .d-toast.on { display: block; animation: dShake .3s ease-in-out; }
+    @keyframes dShake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+
+    /* Nag */
+    .nag {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      background: #0a0006; color: #ff5252; padding: 14px 18px;
+      border: 1px solid #ff1a1a; box-shadow: 0 0 16px rgba(255,26,26,.65);
+      font-family: 'VT323', monospace; font-size: 14px; max-width: 300px;
+      z-index: 250; display: none;
+    }
+    .nag.on { display: block; animation: popIn .3s ease-out; }
+    @keyframes popIn { from{transform:translate(-50%,-50%) scale(.5)} to{transform:translate(-50%,-50%) scale(1)} }
+    .nag button { margin-top: 7px; padding: 4px 9px; background: #1f0008; color: #ff5252; border: 1px solid #ff1a1a; cursor: pointer; font-family: inherit; font-size: 13px; margin-right: 5px; }
+    .nag button:hover { background: #ff1a1a; color: #000; }
+
+    /* Windows XP virus popup */
+    .xp-popup {
+      position: fixed; z-index: 350;
+      background: #d4d0c8; border: 2px solid #0a246a; padding: 0;
+      min-width: 300px; font-family: 'Tahoma', Arial, sans-serif; display: none;
+    }
+    .xp-popup.on { display: block; }
+    .xp-bar {
+      background: linear-gradient(90deg,#0a246a 0%,#a6caf0 100%);
+      padding: 3px 5px; display: flex; justify-content: space-between; align-items: center;
+      color: #fff; font-size: 11px; font-weight: 700; user-select: none; cursor: move;
+    }
+    .xp-bar .xp-close {
+      background: #d4d0c8; border: 1px solid; border-color: #fff #808080 #808080 #fff;
+      color: #000; font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 16px; min-width: 16px; text-align: center;
+    }
+    .xp-body { padding: 14px 12px; font-size: 11px; color: #000; }
+    .xp-body .xp-icon { font-size: 28px; float: left; margin: 0 10px 4px 0; }
+    .xp-btns { display: flex; gap: 5px; justify-content: center; margin-top: 10px; clear: both; }
+    .xp-btns button {
+      background: #d4d0c8; border: 2px solid; border-color: #fff #808080 #808080 #fff;
+      padding: 3px 14px; font-size: 11px; cursor: pointer; min-width: 70px; font-family: inherit;
+    }
+    .xp-btns button:active { border-color: #808080 #fff #fff #808080; }
+
+    /* Free MBs */
+    .free-mb {
+      position: fixed; bottom: 68px; right: 22px;
+      background: #ffff00; color: #ff0000;
+      border: 4px solid; border-image: linear-gradient(45deg,#ff00ff,#00ffff,#39ff14,#ff0000) 1;
+      padding: 9px 13px; font-family: 'Comic Neue', cursive; font-weight: 900; font-size: 17px;
+      z-index: 260; cursor: pointer; max-width: 210px; text-align: center;
+      box-shadow: 0 0 0 2px #000, 7px 7px 0 #ff1493;
+      animation: jig .4s infinite; display: none; position: fixed;
+    }
+    .free-mb.on { display: block; }
+    @keyframes jig { 0%,100%{transform:rotate(-2deg) scale(1);} 50%{transform:rotate(2deg) scale(1.04);} }
+    .free-mb .xb { position: absolute; top: -9px; right: -9px; width: 20px; height: 20px; background: #000; color: #fff; border: 2px solid #fff; border-radius: 50%; display: grid; place-items: center; font-size: 12px; cursor: pointer; font-family: monospace; }
+    .free-mb .fsub { font-size: 10px; color: #0000ff; display: block; }
+
+    /* Scream overlay */
+    .scream-ov {
+      position: fixed; inset: 0; background: rgba(0,0,0,.88);
+      display: none; align-items: center; justify-content: center; z-index: 400;
+    }
+    .scream-ov.on { display: flex; }
+    .scream-box {
+      background: #fff; padding: 28px; max-width: 460px; text-align: center;
+      border: 8px solid #ff0000; position: relative; width: 92%;
+    }
+    .scream-box h2 { font-family: 'Comic Neue', cursive; font-size: 26px; color: #ff0000; margin-bottom: 10px; }
+    .scream-box p { font-size: 13px; color: #333; margin-bottom: 12px; line-height: 1.5; }
+    .scream-box img { width: 100%; max-height: 200px; object-fit: cover; margin-bottom: 14px; border: 3px solid #ff0000; display: block; }
+    .scream-box button { background: #ff0000; color: #fff; border: none; padding: 10px 20px; font-size: 15px; cursor: pointer; font-family: 'Comic Neue', cursive; font-weight: 700; }
+
+    /* Video popup */
+    .vid-ov {
+      position: fixed; inset: 0; background: rgba(0,0,0,.92);
+      display: none; align-items: center; justify-content: center; z-index: 410;
+    }
+    .vid-ov.on { display: flex; }
+    .vid-box {
+      background: #0a0006; border: 2px solid #ff1a1a; padding: 18px;
+      max-width: 520px; width: 92%; position: relative;
+    }
+    .vid-box iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
+    .vid-close {
+      position: absolute; top: -12px; right: -12px;
+      background: #ff1a1a; color: #fff; border: none;
+      width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+      font-size: 14px; display: grid; place-items: center; line-height: 1;
+    }
+    .vid-lbl { font-family: 'VT323', monospace; font-size: 12px; color: #ff5252; margin-top: 7px; }
+
+    /* Loading overlay */
+    .load-ov {
+      position: fixed; inset: 0; background: rgba(0,0,0,.93);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 500; gap: 18px;
+    }
+    .load-ov.on { display: flex; }
+    .load-spin { width: 54px; height: 54px; border: 4px solid #ff1a1a; border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+    .load-txt { font-family: 'VT323', monospace; font-size: 18px; color: #ff5252; letter-spacing: 2px; }
+    .load-pct { font-family: 'VT323', monospace; font-size: 30px; color: #fde047; }
+    .load-bar-wrap { width: 280px; height: 7px; background: #1f0008; border: 1px solid #ff1a1a; overflow: hidden; }
+    .load-bar-fill { height: 100%; background: linear-gradient(90deg,#ff1a1a,#fff); width: 0%; transition: width .25s; }
+
+    /* Cursor sparkle */
+    .sparkle { position: fixed; pointer-events: none; font-size: 11px; z-index: 999; animation: sfade .7s forwards; }
+    @keyframes sfade { 0%{opacity:1;transform:translate(0,0) scale(1);} 100%{opacity:0;transform:translate(0,-28px) scale(.3);} }
+
+    /* shake */
+    .shake { animation: shk .3s ease-in-out; }
+    @keyframes shk { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-7px) rotate(-.8deg);} 40%{transform:translateX(7px) rotate(.8deg);} 60%{transform:translateX(-5px);} 80%{transform:translateX(5px);} }
+
+    @media(max-width:600px){
+      .s1-card,.s2-card{ padding: 0 16px; }
+      .otp-boxes input { width: 40px; height: 48px; font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     SCREEN 1 — ULTRA MINIMAL (centered, nothing else)
+================================================================ -->
+<div id="s1" class="screen active">
+  <div class="s1-card">
+    <div class="s1-logo">
+      <div class="s1-logo-mark">SB</div>
+      <div class="s1-logo-name">SecureBank <span>Pakistan</span></div>
+    </div>
+
+    <h1 class="s1-h">Welcome back</h1>
+    <p class="s1-sub">Sign in to your account</p>
+
+    <div class="f">
+      <label for="s1e">Email address</label>
+      <input id="s1e" type="email" placeholder="you@example.com" autocomplete="email" />
+    </div>
+    <div class="f">
+      <label for="s1p">Password</label>
+      <input id="s1p" type="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <div class="s1-row">
+      <label><input type="checkbox" checked style="margin-right:4px;" /> Keep me signed in</label>
+      <a href="#" onclick="return false;">Forgot password?</a>
+    </div>
+
+    <button class="btn-blue" onclick="goToOTP()">Continue</button>
+
+    <div class="s1-divider"><span>or</span></div>
+    <div class="s1-signup">Don't have an account? <a href="#" onclick="return false;">Sign up</a></div>
+  </div>
+
+  <footer class="s1-footer">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Security</a>
+    <a href="#">Help</a>
+    <span>© 2025 SecureBank Pakistan</span>
+  </footer>
+</div>
+
+<!-- ================================================================
+     SCREEN 2 — OTP (clean, subtle wrongness)
+================================================================ -->
+<div id="s2" class="screen">
+  <div class="s2-card">
+    <div class="s2-back" onclick="show('s1')">← Back</div>
+    <h1 class="s2-h">Check your phone</h1>
+    <p class="s2-desc">
+      We sent a 6-digit code to your number ending in <strong>••• 4829</strong>.
+      Enter it below to continue.
+    </p>
+
+    <!-- subtle: code shown in a "notification" looking thing -->
+    <div class="otp-reveal">
+      <div>
+        <div>📱 Your verification code</div>
+        <div class="otp-code" id="otp-display">──────</div>
+        <div class="otp-note">Shown here for your convenience</div>
+      </div>
+    </div>
+
+    <div class="timer-pill">⏱ Expires in <span id="otp-timer">30</span>s</div>
+
+    <div class="otp-boxes" id="otp-inputs">
+      <input maxlength="1" data-i="0" type="text" inputmode="numeric" />
+      <input maxlength="1" data-i="1" type="text" inputmode="numeric" />
+      <input maxlength="1" data-i="2" type="text" inputmode="numeric" />
+      <input maxlength="1" data-i="3" type="text" inputmode="numeric" />
+      <input maxlength="1" data-i="4" type="text" inputmode="numeric" />
+      <input maxlength="1" data-i="5" type="text" inputmode="numeric" />
+    </div>
+    <div class="otp-hint">Enter all 6 digits to continue</div>
+
+    <button class="btn-blue" onclick="verifyOTP()">Verify</button>
+
+    <div class="s2-resend">Didn't receive it? <span onclick="rerollOTP()">Resend code</span></div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 3 — BSOD #1 (first real shock — Windows style)
+================================================================ -->
+<div id="s3" class="screen">
+  <div class="bs-face">:(</div>
+  <h1 class="bs-h1">Your PC ran into a problem and needs to restart. We're just collecting some error info, and then we'll restart for you.</h1>
+  <div class="bs-body">
+    <b>0% complete</b><br><br>
+    For more information about this issue and possible fixes, visit
+    <b>https://www.windows.com/stopcode</b>
+  </div>
+  <div class="bs-prog-track"><div class="bs-prog-fill" id="bs1-prog"></div></div>
+  <div class="bs-pct" id="bs1-pct">0% complete</div>
+  <div class="bs-code">
+    Stop code: &nbsp;<b>AUTHENTICATION_SOUL_NOT_FOUND</b><br>
+    What failed: &nbsp;securebank_credentials.dll<br>
+    Module: &nbsp;your_hope.sys
+  </div>
+  <!-- fake QR: pattern of spans -->
+  <div class="bs-qr" id="bs-qr"></div>
+  <div class="bs-anykey" id="bs1-anykey">Press any key or click to continue…</div>
+</div>
+
+<!-- ================================================================
+     SCREEN 4 — HELL
+================================================================ -->
+<div id="s4" class="screen">
+  <canvas id="matrix"></canvas>
+
+  <div class="hell-ticker-top">
+    <span>
+      ✨ <b>"Aaj nahi to kabhi nahi"</b> &nbsp;•&nbsp;
+      💀 <b>"Aap se na ho payega"</b> &nbsp;•&nbsp;
+      🐐 <b>GOAT AUTHENTICATION REQUIRED</b> &nbsp;•&nbsp;
+      📺 <b>GEO NEWS BREAKING: Aap ka password 47 hackers ko leak hua</b> &nbsp;•&nbsp;
+      ☕ <b>Chai pi lo phir sochenge</b> &nbsp;•&nbsp;
+      🏏 <b>CRICKET COMMENTARY INTENSIFIES</b> &nbsp;•&nbsp;
+      🛺 <b>Rickshaw wala OTP le gaya bhai</b> &nbsp;•&nbsp;
+      📡 <b>PTCL ROUTER ON FIRE — PLEASE WAIT</b> &nbsp;•&nbsp;
+      🧅 <b>Biryani mein aloo nahi — LOGIN PERMANENTLY FAILED</b> &nbsp;•&nbsp;
+      🕌 <b>Please pray before attempting login again</b> &nbsp;•&nbsp;
+    </span>
+  </div>
+
+  <div class="hell-scroll">
+    <div class="h-title">
+      <span id="rot-logo" style="display:inline-block;animation:spin 4s linear infinite;font-size:34px;vertical-align:middle;margin-right:6px;">🏏</span>
+      L O G I N
+    </div>
+    <div class="h-sub">
+      // jahannum_portal v6.6.6 &nbsp;|&nbsp; ip: <span class="ip" id="hell-ip">127.0.0.1</span><br>
+      <span class="desi">~ beta please suffer below — your patience is our entertainment ~</span>
+    </div>
+
+    <div class="meters">
+      <div class="meter m-rage">
+        <div class="m-lbl"><span>RAGE_METER</span><span id="rage-pct">0%</span></div>
+        <div class="m-bar"><div class="m-fill" id="rage-fill"></div></div>
+      </div>
+      <div class="meter m-dmg">
+        <div class="m-lbl"><span>EMOTIONAL_DMG</span><span id="dmg-pct">0%</span></div>
+        <div class="m-bar"><div class="m-fill" id="dmg-fill"></div></div>
+      </div>
+      <div class="meter m-hope">
+        <div class="m-lbl"><span>HOPE</span><span id="hope-pct">100%</span></div>
+        <div class="m-bar"><div class="m-fill" id="hope-fill" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="hell-card" id="hell-card">
+      <div class="eye" id="eye"><div class="pupil" id="pupil"></div></div>
+
+      <!-- WEBCAM -->
+      <div class="h-field">
+        <label>
+          &gt; BIOMETRIC_SOUL_SCAN
+          <span class="micro">[camera required for identity verification — we promise not to judge your face]</span>
+        </label>
+        <div class="cam-wrap">
+          <video id="camFeed" autoplay muted playsinline></video>
+          <div class="cam-hud">
+            <div class="cam-rec"><div class="rec-dot"></div> REC &nbsp; SOUL SCANNING...</div>
+            <div class="cam-bottom" id="cam-status">Initialising facial disappointment analyser v2.0...</div>
+          </div>
+          <div class="cam-blocked" id="cam-blocked">
+            <span style="font-size:32px;">📷</span>
+            <span>Biometric scan required.<br>Please allow camera access.</span>
+            <button onclick="requestCam()">ALLOW CAMERA</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="h-field">
+        <label>
+          &gt; email_address
+          <span class="micro">[IMPORTANT: must NOT contain the letter 'e' — security policy v6.6.6] [must NOT contain hope]</span>
+        </label>
+        <input id="h-email" placeholder="anonymous@nowhere.onion" oninput="checkE(this)" />
+        <div class="h-err" id="email-err">ERR_TOKEN_DETECTED: letter 'e' found. you are not anonymous enough. remove all hope and try again.</div>
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="h-field">
+        <label>
+          &gt; password
+          <span class="micro">[see rules below — yes all of them — yes we're serious]</span>
+        </label>
+        <div style="position:relative;height:64px;">
+          <input id="h-pass" style="position:absolute;top:0;left:0;width:70%;" placeholder="!ottacorb 💀 O+ rahul..." />
+          <input style="position:absolute;top:22px;left:18%;width:70%;transform:rotate(-1.5deg);border-color:#b4b9ff;box-shadow:0 0 5px rgba(180,185,255,.35);color:#b4b9ff;" placeholder="confirm your regrets" />
+        </div>
+      </div>
+
+      <!-- PASSWORD RULES TICKER -->
+      <div class="pw-ticker">
+        <div class="pw-ticker-inner">
+          PASSWORD MUST: include exactly 2 emojis (no repeating) &nbsp;•&nbsp; start with punctuation &nbsp;•&nbsp; contain your blood type &nbsp;•&nbsp; spell a vegetable backwards &nbsp;•&nbsp; include enemy's childhood nickname &nbsp;•&nbsp; contain 1 Urdu proverb &nbsp;•&nbsp; have exactly 17 characters &nbsp;•&nbsp; NOT contain vowels &nbsp;•&nbsp; NOT contain happiness &nbsp;•&nbsp; NOT contain your actual name &nbsp;•&nbsp; NOT contain hope &nbsp;•&nbsp; change every 4 minutes &nbsp;•&nbsp; previous 500 passwords cannot be reused &nbsp;•&nbsp; must rhyme with "jahannum" &nbsp;•&nbsp;
+        </div>
+      </div>
+
+      <!-- CAPTCHA with REAL images from Unsplash (public CDN) -->
+      <div class="captcha-wrap">
+        <div class="cap-badge">CAPTCHA DIFFICULTY: SHAITANI EXTREME</div>
+        <div class="cap-q">&gt; select ALL images representing disappointment. <span style="animation:blink 1s infinite;display:inline-block;">_</span><br><span style="font-size:10px;color:#6b7280;">(hint: all of them are correct, but that's not how this works)</span></div>
+        <div class="cap-grid" id="cap-grid">
+          <!-- tiles injected by JS with real images -->
+        </div>
+      </div>
+
+      <!-- AGREE -->
+      <div class="agree-row">
+        <label>
+          <input type="checkbox" id="agree-chk" />
+          i accept that nothing matters and my soul is SecureBank property
+        </label>
+        <span class="micro-lnk" onclick="showTerms()">terms</span>
+      </div>
+
+      <!-- 5 IDENTICAL BUTTONS -->
+      <div class="desi-grid">
+        <button onclick="desiToast('Galat button bhai 😭 dimagh use karo na')">LOGIN</button>
+        <button onclick="desiToast('Yeh kya tareeqa hai?? 😤 Seriously?')">LOGIN???</button>
+        <button onclick="doFakeLogin()">LOGIN</button>
+        <button onclick="desiToast('Maybe nahi — definitely nahi. Bilkul nahi.')">maybe continue</button>
+        <button onclick="doFakeLogin()">NOT LOGIN</button>
+        <button style="opacity:0;" onclick="desiToast('🎁 Invisible button mila! Inaam: zero. Shukriya.')">.</button>
+      </div>
+
+      <!-- MAIN ACTION ROW -->
+      <div class="h-actions">
+        <button class="btn-hell" onclick="doRealLogin()">&gt;&gt; SUBMIT LOGIN &lt;&lt;</button>
+        <button class="btn-hell btn-ghost-hell" onclick="desiToast('Password bhool gaye? Hum bhi bhool gaye. Sorry.')">forgot?</button>
+        <button class="runaway" id="runaway-btn" onmouseover="runAway(event)" onclick="desiToast('Aap se na ho payega 😔')">submit</button>
+      </div>
+
+      <div class="prog-reg"></div>
+      <div class="prog-lbl">&gt; verification_progress: regressing... load_shedding_imminent</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM TICKER -->
+  <div class="hell-ticker-bot">
+    <span>// BREACH DETECTED &nbsp;//&nbsp; aap ka webcam on hai &nbsp;//&nbsp; ammi ne aap ko dekh liya &nbsp;//&nbsp; password 47 hackers ko mil gaya &nbsp;//&nbsp; cookies stolen &nbsp;//&nbsp; search history print ho rahi hai &nbsp;//&nbsp; wifi ko sab pata hai &nbsp;//&nbsp; aap ki neeyyat theek nahi &nbsp;//&nbsp; kuch bhi matter nahi karta &nbsp;//&nbsp; load shedding 3 second mein &nbsp;//&nbsp; goat authentication failed &nbsp;//&nbsp; chai thandi ho gayi &nbsp;//&nbsp;</span>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 5 — FAKE SUCCESS
+================================================================ -->
+<div id="s5" class="screen">
+  <div class="s5-box">
+    <h1>✅ LOGIN SUCCESSFUL!</h1>
+    <div class="s5-spin">🎉🥳🎊</div>
+    <p>JazakAllah for using SecureBank™</p>
+    <p style="font-size:17px;margin-top:10px;">Wah beta wah... Nobel Prize 🏆</p>
+    <p style="font-size:13px;margin-top:14px;color:rgba(0,0,0,.6);font-family:'Inter',sans-serif;">Redirecting to your dashboard...</p>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 6 — BSOD #2
+================================================================ -->
+<div id="s6" class="screen">
+  <div class="bs-face">:(</div>
+  <h1 class="bs-h1">Your PC ran into a problem and needs to restart.</h1>
+  <div class="bs-body">
+    We're collecting error info, and then we'll never recover.<br><br>
+    <b>Error:</b> HAPPINESS_NOT_FOUND &nbsp;|&nbsp; <b>Module:</b> your_life.dll
+  </div>
+  <div class="bs-prog-track"><div class="bs-prog-fill" id="bs2-prog"></div></div>
+  <div class="bs-pct" id="bs2-pct">0% complete</div>
+  <div class="bs-code">
+    Stop code: &nbsp;<b>HAPPINESS_NOT_FOUND</b><br>
+    What failed: &nbsp;your_life.dll<br>
+    Aap se: &nbsp;na ho payega<br>
+    Support: &nbsp;visit nearest chai dhaba
+  </div>
+  <div class="bs-anykey" id="bs2-anykey">Press any key or click to continue suffering…</div>
+</div>
+
+<!-- ================================================================
+     SCREEN 7 — FINAL DASHBOARD
+================================================================ -->
+<div id="s7" class="screen">
+  <canvas id="matrix2"></canvas>
+  <div class="final-card">
+    <div class="f-skull">💀</div>
+    <div class="f-title">SUCCESS... MAYBE</div>
+    <div class="f-msg">
+      for security reasons,<br><b>happiness is unavailable.</b><br><br>
+      session expires: <span id="s7-timer">∞</span>
+    </div>
+    <div class="f-btns">
+      <button class="fb1" onclick="goBackToHell()">TRY AGAIN</button>
+      <button class="fb2" onclick="desiToast('Crying.exe is processing... 😢')">CRY</button>
+      <button class="fb3" onclick="desiToast('📞 Ammi: Beta khana kha liya? Studies kaisi hain?')">CALL AMMI</button>
+      <button class="fb4" onclick="show('s6');runBSOD2()">ACCEPT DEFEAT</button>
+    </div>
+    <div class="f-stats">// uptime: <span id="up-timer">0</span>s &nbsp;|&nbsp; rage: MAX &nbsp;|&nbsp; hope: 0%</div>
+  </div>
+</div>
+
+<!-- ================================================================
+     OVERLAYS
+================================================================ -->
+
+<!-- Desi toast -->
+<div class="d-toast" id="d-toast"><div id="d-msg"></div></div>
+
+<!-- Nag -->
+<div class="nag" id="nag">
+  <div>&gt; system: <b>regret_v6.6.6 detected</b></div>
+  <div>Are you sure your life is going in the right direction?</div>
+  <button onclick="closeNag()">no</button>
+  <button onclick="closeNag()">definitely not</button>
+</div>
+
+<!-- Windows XP virus popup -->
+<div class="xp-popup" id="xp-popup" style="top:130px;left:70px;">
+  <div class="xp-bar" id="xp-bar">
+    <span>⚠️ Security Alert — SecureBank Antivirus 2003</span>
+    <button class="xp-close" onclick="document.getElementById('xp-popup').classList.remove('on')">✕</button>
+  </div>
+  <div class="xp-body">
+    <div class="xp-icon">🦠</div>
+    <b>47 VIRUSES DETECTED!</b><br>
+    Your computer is critically infected.<br>
+    Recommended: Panic immediately.<br>
+    <span style="font-size:10px;color:#888;display:block;margin-top:5px;">C:\Users\Beta\Downloads\hope.exe</span>
+    <div class="xp-btns">
+      <button onclick="desiToast('Virus ne OK dabaya 😭');document.getElementById('xp-popup').classList.remove('on')">OK</button>
+      <button onclick="desiToast('Cancel se kya hoga bhai 😤')">Cancel</button>
+      <button onclick="desiToast('Help file load shedding mein gum ho gayi')">Help</button>
+    </div>
+  </div>
+</div>
+
+<!-- Free MBs -->
+<div class="free-mb" id="free-mb">
+  <div class="xb" onclick="closeMB(event)">✕</div>
+  🎁 FREE 50 GB MBs!!<br>
+  <span class="fsub">CLICK HERE LIMITED OFFER</span>
+</div>
+
+<!-- Scream popup (with real image) -->
+<div class="scream-ov" id="scream-ov">
+  <div class="scream-box">
+    <img src="https://images.unsplash.com/photo-1534126511673-b6899657816a?w=460&q=80&auto=format&fit=crop" alt="frustrated person" />
+    <h2>⚠️ SECURITY BREACH DETECTED</h2>
+    <p>Our AI detected you looked confused.<br>This violates our Confidence Policy™.<br><br>
+    <b>Your confusion score: 99/100</b><br>
+    Average SecureBank user: 47/100<br>
+    You are statistically worse at banking.</p>
+    <button onclick="document.getElementById('scream-ov').classList.remove('on')">I AM CONFIDENT</button>
+  </div>
+</div>
+
+<!-- YouTube video popup (Geo News style) -->
+<div class="vid-ov" id="vid-ov">
+  <div class="vid-box">
+    <button class="vid-close" onclick="closeVid()">✕</button>
+    <iframe id="yt-frame" src="" allowfullscreen allow="autoplay"></iframe>
+    <div class="vid-lbl">📺 GEO NEWS BREAKING: Aap ka account suspicious activity detect hua — please verify by watching this full video</div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="load-ov" id="load-ov">
+  <div class="load-spin"></div>
+  <div class="load-txt" id="load-txt">VERIFYING SOUL...</div>
+  <div class="load-pct" id="load-pct">0%</div>
+  <div class="load-bar-wrap"><div class="load-bar-fill" id="load-bar"></div></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   GLOBALS
+═══════════════════════════════════════════════════════════════ */
+let _otp = '000000';
+let rage = 0, dmg = 0, hope = 100;
+let desiTimer, upTimerId;
+let s4Live = false;
+
+/* ═══════════════════════════════════════════════════════════════
+   ROUTER
+═══════════════════════════════════════════════════════════════ */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 1 → 2
+═══════════════════════════════════════════════════════════════ */
+function goToOTP() {
+  const e = document.getElementById('s1e').value.trim();
+  const p = document.getElementById('s1p').value;
+  if (!e || !p) { shake(document.querySelector('.s1-card')); return; }
+  rerollOTP();
+  show('s2');
+  startOTPTimer();
+  setTimeout(() => document.querySelector('#otp-inputs input').focus(), 200);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OTP
+═══════════════════════════════════════════════════════════════ */
+function rerollOTP() {
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  _otp = code;
+  document.getElementById('otp-display').textContent = code;
+  document.querySelectorAll('#otp-inputs input').forEach(i => i.value = '');
+}
+
+let otpIv;
+function startOTPTimer() {
+  clearInterval(otpIv);
+  let t = 30;
+  const el = document.getElementById('otp-timer');
+  otpIv = setInterval(() => {
+    t--;
+    if (t <= 4) { t = 30; rerollOTP(); } // silent reset — user doesn't realise
+    if (el) el.textContent = t;
+  }, 1000);
+}
+
+// OTP box auto-advance with random jump
+document.querySelectorAll('#otp-inputs input').forEach((inp, idx, arr) => {
+  inp.addEventListener('input', e => {
+    if (e.target.value && idx < arr.length - 1) {
+      const next = Math.random() < 0.2 ? Math.floor(Math.random() * arr.length) : idx + 1;
+      arr[next].focus();
+    }
+  });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !e.target.value && idx > 0) arr[idx - 1].focus();
+  });
+});
+
+function verifyOTP() {
+  const entered = Array.from(document.querySelectorAll('#otp-inputs input')).map(i => i.value).join('');
+  if (entered.length !== 6) { shake(document.querySelector('.s2-card')); return; }
+  if (entered !== _otp)     { shake(document.querySelector('.s2-card')); return; }
+  clearInterval(otpIv);
+  // straight to BSOD — no intermediate popup
+  show('s3');
+  runBSOD1();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BSOD 1
+═══════════════════════════════════════════════════════════════ */
+// Build fake QR pattern
+(function buildQR() {
+  const qr = document.getElementById('bs-qr');
+  if (!qr) return;
+  const pattern = [1,1,1,0,1,1,1, 1,0,1,0,1,0,1, 1,0,1,1,1,0,1, 0,1,0,1,0,1,0, 1,0,1,1,1,0,1, 1,0,1,0,1,0,1, 1,1,1,0,1,1,1];
+  pattern.forEach(b => {
+    const s = document.createElement('span');
+    if (!b) s.classList.add('w');
+    qr.appendChild(s);
+  });
+})();
+
+function runBSOD1() {
+  animateBSOD('bs1-prog', 'bs1-pct', 'bs1-anykey', () => {
+    document.getElementById('s3').removeEventListener('click', _bs1click);
+    launchHell();
+  });
+}
+function _bs1click() { launchHell(); }
+
+function animateBSOD(progId, pctId, anyId, cb) {
+  let p = 0;
+  const bar = document.getElementById(progId);
+  const lbl = document.getElementById(pctId);
+  const any = document.getElementById(anyId);
+  const iv = setInterval(() => {
+    p += Math.random() * 5 + 1;
+    if (p >= 100) {
+      p = 100; bar.style.width = '100%'; lbl.textContent = '100% complete';
+      clearInterval(iv);
+      any.style.display = 'block';
+      const fn = () => { document.removeEventListener('keydown', fn); any.closest('.screen').removeEventListener('click', fn); cb(); };
+      setTimeout(() => { document.addEventListener('keydown', fn); any.closest('.screen').addEventListener('click', fn); }, 1000);
+    } else {
+      bar.style.width = p + '%'; lbl.textContent = Math.floor(p) + '% complete';
+    }
+  }, 100);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HELL LAUNCH
+═══════════════════════════════════════════════════════════════ */
+function launchHell() {
+  show('s4');
+  s4Live = true;
+  initMatrix('matrix');
+  startEye();
+  startHellIP();
+  startHellLogo();
+  buildCaptcha();
+  requestCam();
+  initCursorSparkles();
+  // staggered chaos
+  setTimeout(() => document.getElementById('free-mb').classList.add('on'), 4000);
+  setTimeout(() => { document.getElementById('xp-popup').classList.add('on'); makeDraggable(document.getElementById('xp-popup'), document.getElementById('xp-bar')); }, 8000);
+  setTimeout(() => document.getElementById('nag').classList.add('on'), 13000);
+  setTimeout(() => document.getElementById('scream-ov').classList.add('on'), 22000);
+  setTimeout(() => openVideo(), 35000);
+  // cam status updates
+  const camLines = [
+    'Disappointment levels: CRITICAL (98th percentile)',
+    'Face analysis: tired eyes, questionable choices',
+    'Soul scan: 2% complete. ETA: never.',
+    'Emotional damage confirmed. Proceeding anyway.',
+    'Hair status: PTCL router after load shedding',
+    'Ammi disappointment score: 94/100'
+  ];
+  camLines.forEach((line, i) => setTimeout(() => updateCamStatus(line), 4000 + i * 5000));
+  // hope drains
+  setInterval(() => { if (s4Live) bumpMeters(0, 0, -1); }, 3000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CAPTCHA — real Unsplash images
+═══════════════════════════════════════════════════════════════ */
+const capImages = [
+  { url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=200&q=70&auto=format&fit=crop', label: 'exam result' },
+  { url: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=200&q=70&auto=format&fit=crop', label: 'empty chai' },
+  { url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=70&auto=format&fit=crop', label: 'broken router' },
+  { url: 'https://images.unsplash.com/photo-1601758064954-0e45a5c3e2cc?w=200&q=70&auto=format&fit=crop', label: 'Lahori traffic' },
+  { url: 'https://images.unsplash.com/photo-1619431843897-4c4028cc2f1c?w=200&q=70&auto=format&fit=crop', label: 'expired CNIC' },
+  { url: 'https://images.unsplash.com/photo-1624969862293-b749659ccc4e?w=200&q=70&auto=format&fit=crop', label: 'rishta rejected' },
+  { url: 'https://images.unsplash.com/photo-1602394155824-d9edd40c4caa?w=200&q=70&auto=format&fit=crop', label: 'Monday morning' },
+  { url: 'https://images.unsplash.com/photo-1541199249251-f713e6145474?w=200&q=70&auto=format&fit=crop', label: 'power outage' },
+  { url: 'https://images.unsplash.com/photo-1578496479932-143b4a8d10ca?w=200&q=70&auto=format&fit=crop', label: 'load shedding' },
+];
+const randomFilters = [
+  'saturate(0.3) contrast(1.2)', 'sepia(.4)', 'hue-rotate(200deg) saturate(1.5)',
+  'blur(0.6px) contrast(1.1)', 'brightness(0.7) saturate(1.3)', 'none',
+  'grayscale(0.5)', 'hue-rotate(30deg)', 'contrast(1.4) brightness(0.8)'
+];
+
+function buildCaptcha() {
+  const grid = document.getElementById('cap-grid');
+  grid.innerHTML = '';
+  capImages.forEach((img, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'cap-tile' + (i === 3 ? ' dodge' : '');
+    tile.innerHTML = `<img src="${img.url}" style="filter:${randomFilters[i]}" loading="lazy" /><span class="tlbl">${img.label}</span>`;
+    tile.addEventListener('click', () => capClick(tile));
+    if (i === 3) {
+      tile.addEventListener('mouseenter', () => {
+        const dx = (Math.random() - .5) * 110, dy = (Math.random() - .5) * 90;
+        tile.style.transform = `translate(${dx}px,${dy}px) rotate(${Math.random()*40-20}deg)`;
+      });
+    }
+    grid.appendChild(tile);
+  });
+}
+
+function capClick(tile) {
+  tile.classList.toggle('picked');
+  bumpMeters(3, 4, -2);
+  const picked = document.querySelectorAll('.cap-tile.picked').length;
+  if (picked >= 3 && Math.random() < 0.55) {
+    setTimeout(() => {
+      document.querySelectorAll('.cap-tile.picked').forEach(t => t.classList.remove('picked'));
+      desiToast('Captcha refreshed. Phir se karo. Shukriya. 🔄');
+    }, 500);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MATRIX
+═══════════════════════════════════════════════════════════════ */
+function initMatrix(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || canvas._init) return;
+  canvas._init = true;
+  const ctx = canvas.getContext('2d');
+  const resize = () => { canvas.width = innerWidth; canvas.height = innerHeight; };
+  resize(); window.addEventListener('resize', resize);
+  const chars = 'アァカサタナハマヤABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*!?'.split('');
+  const fs = 15;
+  let cols = Math.floor(canvas.width / fs), drops = Array(cols).fill(1);
+  window.addEventListener('resize', () => { cols = Math.floor(canvas.width/fs); drops = Array(cols).fill(1); });
+  setInterval(() => {
+    ctx.fillStyle = 'rgba(4,6,12,.08)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.font = fs + "px 'VT323',monospace";
+    for (let i = 0; i < drops.length; i++) {
+      const ch = chars[Math.floor(Math.random()*chars.length)];
+      const red = Math.random() < .07;
+      ctx.fillStyle = red ? '#ff1a1a' : '#5b6bd6';
+      ctx.shadowColor = red ? '#ff1a1a' : '#3b4ec0'; ctx.shadowBlur = red ? 7 : 2;
+      ctx.fillText(ch, i*fs, drops[i]*fs);
+      if (drops[i]*fs > canvas.height && Math.random() > .975) drops[i] = 0;
+      drops[i]++;
+    }
+  }, 55);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HELL IP + LOGO
+═══════════════════════════════════════════════════════════════ */
+function startHellIP() {
+  const el = document.getElementById('hell-ip');
+  const gen = () => [0,0,0,0].map(()=>Math.floor(Math.random()*256)).join('.');
+  setInterval(() => { if (el) el.textContent = gen(); }, 1400);
+}
+function startHellLogo() {
+  const l = ['🏏','🐐','📶','🍛','☕','🛺','🥁','🕊️','🧅','📡'];
+  let i = 0;
+  const el = document.getElementById('rot-logo');
+  setInterval(() => { i=(i+1)%l.length; if(el) el.textContent=l[i]; }, 3000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CURSOR SPARKLES (only on dark screens)
+═══════════════════════════════════════════════════════════════ */
+let lastSpark = 0;
+function initCursorSparkles() {
+  document.addEventListener('mousemove', e => {
+    const active = document.querySelector('.screen.active');
+    if (!active || (active.id !== 's4' && active.id !== 's7')) return;
+    const now = Date.now();
+    if (now - lastSpark < 60) return;
+    lastSpark = now;
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = ['✨','⭐','💫','🌟','💥','🔥'][Math.floor(Math.random()*6)];
+    s.style.left = e.clientX + 'px'; s.style.top = e.clientY + 'px';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 700);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EYE
+═══════════════════════════════════════════════════════════════ */
+function startEye() {
+  const eye = document.getElementById('eye'), pupil = document.getElementById('pupil');
+  if (!eye || eye._wired) return; eye._wired = true;
+  document.addEventListener('mousemove', e => {
+    if (!document.getElementById('s4').classList.contains('active')) return;
+    const r = eye.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    const dx = (e.clientX - cx)/30, dy = (e.clientY - cy)/30, m = 9;
+    pupil.style.transform = `translate(${Math.max(-m,Math.min(m,dx))}px,${Math.max(-m,Math.min(m,dy))}px)`;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WEBCAM
+═══════════════════════════════════════════════════════════════ */
+function requestCam() {
+  const blocked = document.getElementById('cam-blocked');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    blocked.innerHTML = '<span style="font-size:28px;">🚫</span><span>Camera not supported.<br>Soul scan failed. Continuing with imaginary scan.</span>';
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      document.getElementById('camFeed').srcObject = stream;
+      blocked.style.display = 'none';
+    })
+    .catch(() => {
+      blocked.innerHTML = '<span style="font-size:28px;">🚫</span><span>Camera access denied.<br>We\'re disappointed in your trust issues.<br>Proceeding with imaginary scan anyway.</span>';
+    });
+}
+function updateCamStatus(msg) {
+  const el = document.getElementById('cam-status'); if (el) el.textContent = msg;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EMAIL 'e' CHECK
+═══════════════════════════════════════════════════════════════ */
+function checkE(inp) {
+  const has = inp.value.toLowerCase().includes('e');
+  document.getElementById('email-err').classList.toggle('show', has);
+  if (has) bumpMeters(5, 7, -3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RUNAWAY BUTTON
+═══════════════════════════════════════════════════════════════ */
+function runAway(e) {
+  const btn = e.target, parent = btn.parentElement.getBoundingClientRect();
+  btn.style.right = 'auto';
+  btn.style.left = (Math.random() * (parent.width - 100)) + 'px';
+  btn.style.bottom = (Math.random() * 70 - 60) + 'px';
+  bumpMeters(2, 3, -1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOGIN ACTIONS
+═══════════════════════════════════════════════════════════════ */
+function doFakeLogin() {
+  desiToast('Aap se na ho payega 😔 (try the main button)');
+  shake(document.getElementById('hell-card'));
+  bumpMeters(10, 12, -6);
+}
+
+function doRealLogin() {
+  showLoading(() => {
+    show('s5');
+    s4Live = false;
+    setTimeout(() => { show('s6'); runBSOD2(); }, 2600);
+  });
+}
+
+function runBSOD2() {
+  animateBSOD('bs2-prog', 'bs2-pct', 'bs2-anykey', () => {
+    show('s7');
+    initMatrix('matrix2');
+    startUpTimer();
+    document.getElementById('free-mb').classList.add('on');
+  });
+}
+
+function goBackToHell() { show('s4'); s4Live = true; }
+
+/* ═══════════════════════════════════════════════════════════════
+   LOADING (stalls at 99%)
+═══════════════════════════════════════════════════════════════ */
+const loadMsgs = [
+  'VERIFYING SOUL...','SCANNING BIRYANI PREFERENCE...','CONTACTING PTCL...','WAITING FOR PTCL...',
+  'STILL WAITING FOR PTCL...','PTCL NOT RESPONDING...','ASKING NEIGHBOUR FOR WIFI...',
+  'LOAD SHEDDING IN PROGRESS...','TRYING AGAIN...','CONSULTING RICKSHAW DRIVER...',
+  'DOWNLOADING MORE RAM...','CHECKING AMMI\'S APPROVAL...','ALMOST DONE...'
+];
+function showLoading(cb) {
+  const ov = document.getElementById('load-ov');
+  const bar = document.getElementById('load-bar');
+  const pct = document.getElementById('load-pct');
+  const txt = document.getElementById('load-txt');
+  ov.classList.add('on');
+  let p = 0, mi = 0;
+  const iv = setInterval(() => {
+    p += Math.random() * 10 + 1;
+    if (p >= 99) {
+      p = 99; bar.style.width = '99%'; pct.textContent = '99%'; txt.textContent = 'ALMOST DONE...';
+      clearInterval(iv);
+      setTimeout(() => { ov.classList.remove('on'); cb(); }, 3200);
+    } else {
+      bar.style.width = p + '%'; pct.textContent = Math.floor(p) + '%';
+      if (Math.random() < .3) { txt.textContent = loadMsgs[mi % loadMsgs.length]; mi++; }
+    }
+  }, 200);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   METERS
+═══════════════════════════════════════════════════════════════ */
+function bumpMeters(r, d, h) {
+  rage = Math.min(100, rage + r);
+  dmg  = Math.min(100, dmg  + d);
+  hope = Math.max(0,   hope + (h || 0));
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.style.width = val + '%'; };
+  const setT = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val + '%'; };
+  set('rage-fill', rage); setT('rage-pct', rage);
+  set('dmg-fill',  dmg);  setT('dmg-pct',  dmg);
+  set('hope-fill', hope); setT('hope-pct', hope);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DESI TOAST
+═══════════════════════════════════════════════════════════════ */
+function desiToast(msg) {
+  const t = document.getElementById('d-toast');
+  document.getElementById('d-msg').textContent = msg;
+  t.classList.remove('on'); void t.offsetWidth; t.classList.add('on');
+  clearTimeout(desiTimer);
+  desiTimer = setTimeout(() => t.classList.remove('on'), 3400);
+  bumpMeters(8, 10, -4);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAG + FREE MB + TERMS
+═══════════════════════════════════════════════════════════════ */
+function closeNag() {
+  document.getElementById('nag').classList.remove('on');
+  bumpMeters(4, 5, -2);
+  setTimeout(() => document.getElementById('nag').classList.add('on'), 11000);
+}
+function closeMB(e) {
+  e.stopPropagation();
+  document.getElementById('free-mb').classList.remove('on');
+  setTimeout(() => document.getElementById('free-mb').classList.add('on'), 9000);
+}
+document.getElementById('free-mb').addEventListener('click', e => {
+  if (!e.target.classList.contains('xb')) desiToast('🎁 Aap ne 0 MB jeet liye! Mubarak ho!');
+});
+
+function showTerms() {
+  alert('TERMS & CONDITIONS (v6.6.6):\n\n1. We own your soul.\n2. No refunds.\n3. We sell your tears to Geo News.\n4. By breathing near this screen you agree.\n5. Your biryani preference is shared with 47 parties.\n6. Section 47-B: Hope is not guaranteed.\n7. Aap se na ho payega.\n\n[Scroll down for 3,000 more pages...]');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VIDEO POPUP (Geo News / rickshaw / cricket)
+═══════════════════════════════════════════════════════════════ */
+function openVideo() {
+  // Play a looping Geo News or Pakistani content — using public YouTube embed
+  // Using a benign public domain / freely embeddable clip
+  document.getElementById('yt-frame').src = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0';
+  document.getElementById('vid-ov').classList.add('on');
+}
+function closeVid() {
+  document.getElementById('yt-frame').src = '';
+  document.getElementById('vid-ov').classList.remove('on');
+  desiToast('Video skip kar diya? Shukriya for your time. 😑');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAGGABLE (XP popup)
+═══════════════════════════════════════════════════════════════ */
+function makeDraggable(el, handle) {
+  if (handle._draggable) return; handle._draggable = true;
+  handle.style.cursor = 'move';
+  let ox, oy;
+  handle.addEventListener('mousedown', e => {
+    ox = e.clientX - el.offsetLeft; oy = e.clientY - el.offsetTop;
+    const mv = e => { el.style.left = (e.clientX-ox)+'px'; el.style.top = (e.clientY-oy)+'px'; };
+    const up = () => { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
+    document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UP TIMER
+═══════════════════════════════════════════════════════════════ */
+function startUpTimer() {
+  clearInterval(upTimerId); let s = 0;
+  const el = document.getElementById('up-timer');
+  upTimerId = setInterval(() => { s++; if (el) el.textContent = s; }, 1000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SHAKE UTIL
+═══════════════════════════════════════════════════════════════ */
+function shake(el) {
+  if (!el) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+  setTimeout(() => el.classList.remove('shake'), 350);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KONAMI + ADMIN EASTER EGGS
+═══════════════════════════════════════════════════════════════ */
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let ki = 0;
+document.addEventListener('keydown', e => {
+  ki = (e.key === KONAMI[ki]) ? ki + 1 : 0;
+  if (ki === KONAMI.length) {
+    desiToast('🎉 SHAADI MODE UNLOCKED 🎊 Dhol baja do!');
+    ki = 0;
+  }
+  window._t = ((window._t||'') + e.key).slice(-10);
+  if (window._t.toLowerCase().includes('admin')) {
+    desiToast('🐐🐐🐐 Bakra admin access granted 🐐🐐🐐');
+    window._t = '';
+  }
+});
+</script>
+</body>
+</html>

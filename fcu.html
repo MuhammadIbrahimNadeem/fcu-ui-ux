@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRM PROD DB v.6.6.6 — SECURE LOGIN™</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Comic Sans MS',cursive;background:#f5e3c0;min-height:100vh;overflow-x:hidden;position:relative}
+
+/* RAGE METER */
+#rage-container{position:fixed;top:0;left:0;right:0;z-index:9999;background:#111;height:26px;display:flex;align-items:center;padding:0 8px;gap:8px;font-size:11px;color:white}
+#rage-bar{flex:1;height:14px;background:#333;border-radius:2px;overflow:hidden}
+#rage-fill{height:100%;width:0%;background:linear-gradient(90deg,#00ff00,#ffff00,#ff6600,#ff0000);transition:width 0.3s}
+#fake-timer{position:fixed;top:0;right:0;background:#cc0000;color:white;padding:4px 8px;font-size:11px;z-index:10000;font-family:'Comic Sans MS',cursive}
+
+/* HEADER */
+#main-header{margin-top:26px;background:#1a2e6e;display:flex;align-items:center;min-height:80px;position:relative;overflow:hidden}
+#header-logo{width:80px;height:80px;display:flex;align-items:center;justify-content:center;font-size:38px;background:white;margin-left:10px;cursor:pointer;flex-shrink:0}
+#header-title{flex:1;text-align:center;color:white}
+#header-title h1{font-size:22px;font-weight:bold;font-family:'Times New Roman',serif;letter-spacing:2px}
+#header-title h2{font-size:12px;font-weight:normal;color:#aaddff;font-family:'Comic Sans MS',cursive}
+.hdate{color:#ff9900;font-size:12px;padding:8px;flex-shrink:0}
+
+/* MARQUEE */
+.marquee-wrap{background:#cc0000;overflow:hidden;padding:3px 0}
+.marquee-text{display:inline-block;white-space:nowrap;animation:marquee 18s linear infinite;font-size:12px;color:white;font-family:'Comic Sans MS',cursive}
+@keyframes marquee{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+
+/* MENU */
+#top-menu{background:#1a2e6e;padding:2px 4px}
+#top-menu ul{list-style:none;display:flex;gap:2px}
+#top-menu ul li a{display:block;background:#2a4a9e;color:white;padding:5px 14px;font-size:12px;text-decoration:none;font-family:Arial,sans-serif}
+#top-menu ul li a:hover{background:#3a5abe}
+
+/* BANNER */
+#banner-ad{background:linear-gradient(90deg,#ff0000,#ff6600,#ffff00,#00ff00);text-align:center;padding:5px;font-family:'Comic Sans MS',cursive;font-size:13px;font-weight:bold;cursor:pointer;animation:blink 0.8s step-end infinite}
+
+/* SCREENS */
+.screen{display:none;min-height:calc(100vh - 140px)}
+.screen.active{display:block}
+
+/* SCREEN 1 */
+#screen1{background:#f5e3c0;background-image:repeating-linear-gradient(90deg,transparent,transparent 20px,rgba(180,150,100,0.08) 20px,rgba(180,150,100,0.08) 21px)}
+#login-col{display:flex;padding:30px;gap:30px;max-width:1100px;margin:0 auto}
+#login-left{flex:1}
+#login-title{margin-bottom:20px}
+#login-title h6{font-size:28px;font-weight:bold;color:#1a2e6e;font-family:'Comic Sans MS',cursive;line-height:1.3}
+.title-sub{color:#4a7abf;font-size:16px;margin-top:4px}
+.field-text{width:280px;padding:6px 10px;border:1px solid #999;font-size:14px;font-family:'Comic Sans MS',cursive;background:white}
+.l-label{font-size:11px;color:#666;margin-bottom:6px;font-family:Arial,sans-serif}
+.l-entry{margin:8px 0 2px}
+
+/* CAROUSEL */
+#network-carousel{width:280px;height:40px;overflow:hidden;border:1px solid #999;background:white;position:relative}
+#carousel-inner{display:flex;flex-direction:column;animation:carouselSpin 0.9s linear infinite}
+.c-item{height:40px;display:flex;align-items:center;padding:0 10px;font-size:13px;font-family:'Comic Sans MS',cursive;border-bottom:1px solid #eee}
+@keyframes carouselSpin{from{transform:translateY(0)}to{transform:translateY(-160px)}}
+
+/* BUTTONS */
+.btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;max-width:280px}
+.submit-btn{background:#1a2e6e;color:white;border:none;padding:8px 18px;cursor:pointer;font-size:13px;font-family:'Comic Sans MS',cursive;font-weight:bold}
+.submit-btn:hover{background:#2a4a9e}
+.invisible-btn{opacity:0}
+
+/* INITIAL CAPTCHA */
+#init-captcha{background:#fff9f0;border:2px solid #1a2e6e;padding:15px;margin:10px 0;max-width:280px}
+#init-captcha p{font-size:12px;margin-bottom:8px;color:#333}
+.cap-math{font-size:20px;font-weight:bold;color:#cc0000;font-family:'Times New Roman',serif;background:#eee;padding:4px 10px;display:inline-block;text-decoration:line-through wavy red}
+.cap-input{width:70px;padding:4px 8px;border:1px solid #999;font-size:14px;margin-right:4px}
+.err-msg{color:#cc0000;font-size:12px;margin-top:4px;display:none}
+.ok-msg{color:green;font-size:12px;margin-top:4px;display:none}
+#capslock-warn{color:orange;font-size:11px;margin-top:3px;display:none}
+
+/* RIGHT PHOTOS */
+#login-right{flex-shrink:0}
+.photo-block{width:300px;height:155px;background:#1a2e6e;display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:4px;position:relative;overflow:hidden}
+.photo-block::after{content:attr(data-cap);position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);color:white;font-size:10px;padding:3px 6px;font-family:Arial}
+
+/* SCREEN 2 */
+#screen2{background:linear-gradient(135deg,#1a2e6e,#4a0080,#8b0000);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 20px}
+#screen2.active{display:flex}
+.pass-box{background:rgba(0,0,0,0.75);border:2px solid #00ff41;padding:30px;max-width:500px;width:100%;color:white;font-family:'Comic Sans MS',cursive}
+.pass-box h2{color:#ff3333;font-size:20px;margin-bottom:18px;text-align:center;text-shadow:0 0 10px red;animation:flicker 2.5s infinite}
+@keyframes flicker{0%,94%,100%{opacity:1}95%{opacity:0.3}97%{opacity:0.9}}
+.rule-list{list-style:none;margin-bottom:18px}
+.rule-list li{padding:7px 12px;margin:3px 0;font-size:13px;border-left:3px solid transparent;transition:all 0.3s}
+.r-fail{border-left-color:#ff3333!important;color:#ff8888;background:rgba(255,0,0,0.1)}
+.r-pass{border-left-color:#00ff41!important;color:#88ff88;background:rgba(0,255,0,0.1)}
+.r-hide{display:none!important}
+.pass-input-wrap{position:relative;margin-bottom:12px}
+.pass-input-wrap input{width:100%;padding:10px 40px 10px 12px;background:#111;border:1px solid #00ff41;color:#00ff41;font-size:16px;font-family:monospace}
+.pass-input-wrap input:focus{outline:none;box-shadow:0 0 10px #00ff41}
+#vis-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:20px}
+#str-bar{height:6px;background:#333;margin-bottom:8px;overflow:hidden}
+#str-fill{height:100%;width:0%;background:red;transition:width 0.3s}
+#str-label{font-size:10px;color:#888;text-align:right;margin-bottom:12px}
+#rule-err{color:#ff3333;font-size:12px;min-height:18px;margin-bottom:10px}
+
+/* SCREEN 3 */
+#screen3{background:#f0e8d0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 20px}
+#screen3.active{display:flex}
+.cap-box{background:white;border:3px solid #666;padding:20px;max-width:420px;width:100%;font-family:Arial,sans-serif}
+.cap-hdr{font-size:13px;color:#333;margin-bottom:10px;font-weight:bold}
+.cap-inst{font-size:15px;color:#1a2e6e;margin-bottom:14px;font-weight:bold;min-height:48px}
+.cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:14px}
+.cap-cell{width:100%;aspect-ratio:1;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:28px;cursor:pointer;border:3px solid transparent;transition:border 0.2s;user-select:none}
+.cap-cell:hover{background:#e8f0fe}
+.cap-cell.selected{border-color:#1967d2;background:#e8f0fe}
+.cap-cell.wrong-blink{animation:wrongBlink 0.5s}
+@keyframes wrongBlink{0%,100%{background:#f5f5f5}50%{background:#ffcccc}}
+.cell-label{font-size:8px;color:#666;text-align:center;margin-top:2px;line-height:1.1}
+.cap-verify-btn{width:100%;padding:10px;background:#1a2e6e;color:white;border:none;cursor:pointer;font-size:14px;font-weight:bold}
+
+/* BLACKOUT */
+#blackout{position:fixed;inset:0;background:black;z-index:999999;display:none;flex-direction:column;align-items:center;justify-content:center;color:white;font-family:'Comic Sans MS',cursive}
+#blackout.on{display:flex}
+#blackout-count{font-size:100px;color:#222}
+
+/* SCREEN 4 */
+#screen4{background:linear-gradient(180deg,#e8f5e9,#fff9c4);min-height:calc(100vh - 140px);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;padding:40px 20px}
+#screen4.active{display:flex}
+.otp-box{background:white;border:2px solid #1a2e6e;padding:30px;max-width:420px;width:100%;text-align:center;font-family:'Comic Sans MS',cursive;position:relative;z-index:10}
+.otp-box h2{color:#1a2e6e;font-size:18px;margin-bottom:8px}
+.otp-box p{font-size:12px;color:#666;margin-bottom:14px}
+.delivery-opts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;justify-content:center}
+.d-opt{padding:5px 10px;border:2px solid #1a2e6e;background:white;cursor:pointer;font-size:11px;font-family:'Comic Sans MS',cursive}
+.d-opt.sel{background:#1a2e6e;color:white}
+.otp-sent-msg{background:#e8f5e9;border:1px solid #4caf50;padding:10px;margin:12px 0;font-size:12px;display:none;text-align:left}
+.otp-inputs{display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+.otp-digit{width:46px;height:58px;border:2px solid #1a2e6e;text-align:center;font-size:22px;font-weight:bold;font-family:monospace}
+.otp-digit:nth-child(3){transform:rotate(180deg);border-color:#cc0000}
+.otp-verify-btn{background:#1a2e6e;color:white;border:none;padding:12px 28px;font-size:15px;cursor:pointer;font-family:'Comic Sans MS',cursive;font-weight:bold}
+#otp-err{color:red;font-size:12px;margin-bottom:10px;display:block;min-height:18px}
+
+/* WARDEN */
+#warden{position:fixed;bottom:20px;left:-120px;cursor:pointer;z-index:5000;display:none;flex-direction:column;align-items:center}
+#warden.on{display:flex}
+#warden-body{font-size:60px;line-height:1;animation:wardWalk 0.4s steps(2) infinite}
+@keyframes wardWalk{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}100%{transform:scaleX(1)}}
+#warden-ticket{background:yellow;border:1px solid #999;padding:2px 6px;font-size:10px;font-family:monospace;font-weight:bold;display:none;color:#333;white-space:nowrap}
+#warden-code{font-size:16px;font-weight:bold;color:#cc0000;font-family:monospace;letter-spacing:3px;display:none}
+#warden-hint{font-size:10px;color:#333;text-align:center;background:rgba(255,255,255,0.8);padding:2px 4px;animation:bob 1s infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+/* SCREEN 5 */
+#screen5{background:white;display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:calc(100vh - 140px);padding:40px}
+#screen5.active{display:flex}
+#spinner{width:48px;height:48px;border:4px solid #eee;border-top-color:#1a2e6e;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading-txt{font-family:Arial,sans-serif;font-size:13px;color:#666}
+#finale-msg{font-family:Arial,sans-serif;font-size:12px;text-align:center;display:none;max-width:400px}
+#finale-msg h1{font-size:18px;font-weight:600;letter-spacing:1px;margin-bottom:16px;color:#222}
+#finale-joke{font-size:11px;color:#999;margin-top:24px;display:none;text-align:center;line-height:1.6}
+
+/* GHABRANA MODAL */
+#ghabrana-modal{position:fixed;inset:0;z-index:9998;display:none;align-items:flex-start;justify-content:center;padding-top:80px;background:rgba(0,0,0,0.5)}
+#ghabrana-modal.on{display:flex}
+.ghab-box{background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);border-radius:12px;padding:30px 40px;text-align:center;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideDown 0.4s ease}
+@keyframes slideDown{from{transform:translateY(-40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.ghab-box h2{font-size:18px;margin-bottom:8px;color:#333}
+.ghab-box p{font-size:13px;color:#666;margin-bottom:18px}
+#ghab-yes{background:#1a2e6e;color:white;border:none;padding:12px 40px;border-radius:6px;font-size:15px;cursor:pointer;width:100%;font-family:'Comic Sans MS',cursive}
+
+/* FAKE POPUP */
+.fake-pop{position:fixed;background:white;border:2px solid #cc0000;padding:14px;z-index:9990;max-width:240px;box-shadow:3px 3px 0 #666;font-family:'Comic Sans MS',cursive;font-size:12px}
+.fake-pop-x{position:absolute;top:2px;right:6px;cursor:pointer;font-weight:bold;color:#cc0000;font-size:14px}
+
+/* ANIMATIONS */
+.shake{animation:shake 0.4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+.blink{animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes spin2{to{transform:rotate(360deg)}}
+
+/* FLOATING URDU */
+.urdu-float{position:fixed;font-family:'Times New Roman',serif;font-size:13px;color:rgba(26,46,110,0.2);pointer-events:none;z-index:1;animation:floatUp linear infinite;white-space:nowrap}
+@keyframes floatUp{from{transform:translateY(100vh);opacity:0}10%{opacity:1}90%{opacity:1}to{transform:translateY(-60px);opacity:0}}
+
+/* FOOTER */
+#footer{background:#1a2e6e;color:#888;text-align:center;padding:8px;font-size:10px;font-family:Arial}
+
+/* CURSOR TRAIL */
+.c-dot{position:fixed;width:6px;height:6px;border-radius:50%;background:#cc0000;pointer-events:none;z-index:99999;transition:opacity 0.5s}
+
+/* FAKE PROGRESS */
+#fake-progress-wrap{display:none;margin-top:12px;width:100%;max-width:280px}
+#fake-progress-bar{height:8px;background:#eee;border-radius:4px;overflow:hidden}
+#fake-progress-fill{height:100%;width:0%;background:#1a2e6e;transition:width 0.05s}
+#fake-progress-label{font-size:11px;color:#666;margin-top:4px;font-family:Arial}
+</style>
+</head>
+<body>
+
+<!-- RAGE METER -->
+<div id="rage-container">
+  <span>😤 GUSSA METER:</span>
+  <div id="rage-bar"><div id="rage-fill"></div></div>
+  <span id="rage-lbl">Shukriya 🙏</span>
+</div>
+<div id="fake-timer">Session expires in <span id="timer-n">4</span>s ⚠️</div>
+
+<!-- BLACKOUT -->
+<div id="blackout">
+  <div style="font-size:40px;margin-bottom:16px">💀 LOAD SHEDDING 💀</div>
+  <div id="blackout-count">3</div>
+  <div style="font-size:15px;margin-top:16px;color:#555">WAPDA ki taraf se khushamadeed</div>
+  <div style="font-size:24px;margin-top:10px;animation:spin2 2s linear infinite;display:inline-block">⚡</div>
+</div>
+
+<!-- GHABRANA MODAL -->
+<div id="ghabrana-modal">
+  <div class="ghab-box">
+    <h2>Aap thaka hua mehsoos kar rahe hain? 😔</h2>
+    <p>Hum samajhte hain. Yeh login actually mushkil hai.</p>
+    <button id="ghab-yes">Haan, main pareshan hoon 😭</button>
+    <div style="margin-top:8px;font-size:10px;color:#aaa">(This will not help)</div>
+  </div>
+</div>
+
+<!-- FLOATING URDU QUOTES -->
+<div class="urdu-float" style="left:8%;animation-duration:12s;animation-delay:0s">محنت کرو، نتیجہ اللہ پر چھوڑ دو</div>
+<div class="urdu-float" style="left:42%;animation-duration:10s;animation-delay:5s">پاسورڈ بھول گئے؟ تقدیر ہے</div>
+<div class="urdu-float" style="left:72%;animation-duration:14s;animation-delay:9s">صبر کا پھل میٹھا ہوتا ہے (شاید)</div>
+
+<!-- HEADER -->
+<div id="main-header">
+  <div id="header-logo" title="Double click for secret" ondblclick="easterEggLogo()">🏫</div>
+  <div id="header-title">
+    <h1>FORMAN CHRISTIAN COLLEGE</h1>
+    <h2>(Ek Aisi Jagah Jahan Sab Kuch Hota Hai Siwa Login Ke)</h2>
+  </div>
+  <div class="hdate">Tuesday, May 19, 2026</div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <span class="marquee-text">⚠️ FREE MBs CLICK HERE ⚠️ &nbsp;&nbsp; 🎉 آپ نے جیت لیا! ابھی کلک کریں! &nbsp;&nbsp; 💀 SYSTEM BREACH DETECTED — JUST KIDDING &nbsp;&nbsp; 🐐 SPINNING GOAT AVAILABLE IN PREMIUM &nbsp;&nbsp; ☕ CHAI BREAK: 2 MIN &nbsp;&nbsp; 📡 PTCL CONNECTION: EXCELLENT (liar) &nbsp;&nbsp; ⚠️ FREE MBs CLICK HERE ⚠️</span>
+</div>
+
+<!-- MENU -->
+<div id="top-menu">
+  <ul>
+    <li><a href="#" onclick="alert('Password recover karna? Hum bhi dhundh rahe hain.'); return false">Forgotten Password</a></li>
+    <li><a href="#" onclick="alert('Course catalog? Pehle login toh karo bhai 😭'); return false">Course Catalog</a></li>
+    <li><a href="#" onclick="triggerBlackout(); return false">Load Shedding Schedule ⚡</a></li>
+  </ul>
+</div>
+
+<!-- BANNER AD -->
+<div id="banner-ad" onclick="alert('Sirf mazak tha 😭')">🔥 FCCU STUDENT OFFER: 50% off next semester's login attempts! CLICK NOW! 🔥</div>
+
+<!-- ══════════ SCREEN 1: LOGIN ══════════ -->
+<div id="screen1" class="screen active">
+  <div id="login-col">
+    <div id="login-left">
+      <div id="login-title">
+        <h6>Welcome to Forman Christian College</h6>
+        <div class="title-sub">Student Information System (Inshaallah)</div>
+      </div>
+
+      <!-- PRE-CAPTCHA -->
+      <div id="init-captcha">
+        <p>⚠️ Pehle prove karo ke tum insaan ho. Robot nahi.</p>
+        <div class="cap-math" id="cap-q">3 × 7 = ?</div><br>
+        <input type="text" class="cap-input" id="cap-ans" placeholder="Jawab" onkeydown="if(event.key==='Enter')checkCap0()">
+        <button onclick="checkCap0()" style="padding:5px 10px;cursor:pointer;background:#1a2e6e;color:white;border:none;font-family:'Comic Sans MS',cursive">Submit</button>
+        <div class="err-msg" id="cap0-err">❌ غلط جواب۔ Math parhna chahiye tha.</div>
+        <div class="ok-msg" id="cap0-ok">✅ Sahi! Ek aur sawal...</div>
+      </div>
+
+      <!-- MAIN FORM -->
+      <div id="main-form" style="opacity:0.3;pointer-events:none">
+        <div class="l-entry">
+          <input id="uname" class="field-text" type="text" placeholder="Enter your emotional support CMS ID" oninput="onUname()">
+        </div>
+        <div class="l-label">apna roll number / taqdeer / CNIC (kuch bhi chalega)</div>
+
+        <div class="l-label" style="margin-top:10px">Mobile Network (Select karne ki koshish karo):</div>
+        <div id="network-carousel">
+          <div id="carousel-inner">
+            <div class="c-item">📱 Jazz — "Connection Bilkul Stable Hai"</div>
+            <div class="c-item">📡 Zong — "Signal Dhundh Raha Hai..."</div>
+            <div class="c-item">📶 Telenor — "Ek Second Ruko"</div>
+            <div class="c-item">🔴 Ufone — "Aap Ki Taraf Se"</div>
+            <div class="c-item">📱 Jazz — "Connection Bilkul Stable Hai"</div>
+            <div class="c-item">📡 Zong — "Signal Dhundh Raha Hai..."</div>
+            <div class="c-item">📶 Telenor — "Ek Second Ruko"</div>
+            <div class="c-item">🔴 Ufone — "Aap Ki Taraf Se"</div>
+          </div>
+        </div>
+        <div class="l-label">network provider (OTP nahi aayega, phir bhi select karo)</div>
+
+        <div class="l-entry" style="margin-top:10px">
+          <input id="pwd1" class="field-text" type="password" placeholder="Type your secret pain 💀" oninput="onPwd1()" onkeydown="capslockCheck(event)">
+        </div>
+        <div class="l-label">password (ya apna dard, jo bhi pehle yaad aaye)</div>
+
+        <div class="l-entry" style="margin-top:10px">
+          <input id="potato" class="field-text" type="number" min="0" max="100" placeholder="🥔 Biryani mein kitne aloo thay?" style="border:2px solid #cc0000">
+        </div>
+        <div class="l-label" style="color:#cc0000">⚠️ ZARORI: Bina aloo count ke login nahi hoga<br><span style="font-size:9px;color:#aaa">Tooltip: Without potato login may fail</span></div>
+
+        <div id="capslock-warn">⚠️ Caps Lock on hai bhai. Seedha karo.</div>
+        <div class="err-msg" id="s1-err" style="margin-top:6px">🔊 PEECHAY TOH DEKHO, PEECHAY! غلط data!</div>
+
+        <div class="btn-group">
+          <button class="submit-btn" id="btn-a" onclick="loginBtn('real')">LOGIN</button>
+          <button class="submit-btn" id="btn-b" onclick="loginBtn('confuse')">LOGIN???</button>
+          <button class="submit-btn" id="btn-c" onclick="loginBtn('not')">NOT LOGIN</button>
+          <button class="submit-btn" id="btn-d" onclick="loginBtn('maybe')">maybe continue</button>
+          <button class="submit-btn invisible-btn" onclick="loginBtn('secret')">SECRET</button>
+        </div>
+        <div style="font-size:9px;color:#aaa;margin-top:5px;font-family:Arial">* Only one button actually works. Good luck.<br>* Buttons may dodge. It's a feature, not a bug.</div>
+
+        <div style="margin-top:14px;display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="terms" style="opacity:0.25;cursor:not-allowed" onclick="alert('Decoration hai yeh checkbox 🎭'); return false">
+          <label for="terms" style="font-size:11px;color:#666;font-family:Arial">I agree to the Terms of Suffering and the Privacy of Pain *(Required)</label>
+        </div>
+
+        <div id="fake-progress-wrap">
+          <div id="fake-progress-bar"><div id="fake-progress-fill"></div></div>
+          <div id="fake-progress-label">Loading... 0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="login-right">
+      <div class="photo-block" data-cap="Students studying (or crying, hard to tell)">🎓📚😭</div>
+      <div class="photo-block" data-cap="Beautiful campus (when PTCL works)">🏫🌳☕</div>
+      <div class="photo-block" data-cap="Happy graduates (they escaped)">🎉🎊👋</div>
+      <div style="font-size:10px;color:#aaa;font-family:Arial;text-align:center;margin-top:6px">*Photos may not represent actual student experience</div>
+    </div>
+  </div>
+  <div id="footer"><p>Powered by Suffering™ | Made in Pakistan 🇵🇰 | FRM PROD DB v.6.6.6 | <span class="blink">🔴 LIVE</span> | <span style="font-size:9px">Recommended: Internet Explorer 6.0</span></p></div>
+</div>
+
+<!-- ══════════ SCREEN 2: PASSWORD LABYRINTH ══════════ -->
+<div id="screen2" class="screen">
+  <div class="pass-box" id="pass-box">
+    <h2>🔐 PASSWORD KI DUNIYA MEIN KHUSH AAMDEED 🔐</h2>
+    <p style="color:#aaa;font-size:12px;text-align:center;margin-bottom:14px">Password bnao. Asaan lagega. Nahi lagega.</p>
+
+    <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">📋 Password Requirements (so far):</div>
+    <ul class="rule-list" id="rule-list">
+      <li id="r1" class="r-fail">❌ Must be at least 8 characters</li>
+      <li id="r2" class="r-hide">❌ Must contain a special character (!@#$%^&*)</li>
+      <li id="r3" class="r-hide">❌ Must contain a Roman numeral (I V X L C D M)</li>
+      <li id="r4" class="r-hide">❌ All numeric digits must sum to exactly 27 💀</li>
+      <li id="r5" class="r-hide">❌ Cannot contain any letter from your own name</li>
+    </ul>
+
+    <div class="pass-input-wrap">
+      <input type="password" id="pass-field" placeholder="Apna password yahan..." oninput="checkPass()">
+      <span id="vis-toggle" onclick="toggleVis()">😭</span>
+    </div>
+    <div id="str-bar"><div id="str-fill"></div></div>
+    <div id="str-label">Strength: Bhai seriously?</div>
+    <div id="rule-err"></div>
+
+    <button class="submit-btn" style="width:100%;padding:12px;font-size:15px" onclick="submitPass()">
+      Submit Password (Inshaallah)
+    </button>
+    <div style="margin-top:12px;text-align:center;font-size:11px;color:#666" id="pass-attempts">Attempts: ∞ (patience: finite)</div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 3: DESI CAPTCHA ══════════ -->
+<div id="screen3" class="screen">
+  <div style="font-size:16px;margin-bottom:18px;color:#1a2e6e;font-family:'Comic Sans MS',cursive;font-weight:bold;text-align:center">
+    🤖 Prove You Are NOT a Government Employee 🤖
+  </div>
+  <div class="cap-box">
+    <div class="cap-hdr">
+      <span style="color:#1a73e8">r</span><span style="color:#ea4335">e</span><span style="color:#fbbc05">C</span><span style="color:#34a853">A</span><span style="color:#1a73e8">P</span><span style="color:#ea4335">T</span><span style="color:#fbbc05">C</span><span style="color:#34a853">H</span><span style="color:#1a73e8">A</span>
+      &nbsp;"Desi Edition" &nbsp;<span style="font-size:10px;color:#999">Powered by 🇵🇰 Technology</span>
+    </div>
+    <div class="cap-inst" id="cap-inst">Loading CAPTCHA...</div>
+    <div class="cap-grid" id="cap-grid"></div>
+    <div style="font-size:10px;color:#999;margin-bottom:10px;font-style:italic">⚠️ Wrong selection silently deletes last char of your password</div>
+    <button class="cap-verify-btn" onclick="verifyCap()">✓ Verify (Haan Ya Nahi?)</button>
+    <div id="cap-err" style="font-size:12px;margin-top:8px;display:none"></div>
+    <div id="cap-tries" style="font-size:11px;color:#999;margin-top:6px;text-align:right">Attempts: 0 / ∞</div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 4: OTP ══════════ -->
+<div id="screen4" class="screen">
+  <div class="otp-box">
+    <h2>📱 OTP Bheji Ja Rahi Hai... (Shayad)</h2>
+    <p>Delivery method select karo:</p>
+    <div class="delivery-opts">
+      <button class="d-opt sel" onclick="selDel(this,'sms')">📱 SMS</button>
+      <button class="d-opt" onclick="selDel(this,'wa')">💬 WhatsApp</button>
+      <button class="d-opt" onclick="selDel(this,'pigeon')">🕊️ Pigeon</button>
+      <button class="d-opt" onclick="selDel(this,'rick')">🛺 Rickshaw</button>
+      <button class="d-opt" onclick="selDel(this,'dhol')">🥁 Dhol Wala</button>
+      <button class="d-opt" onclick="selDel(this,'aunty')">👩 Random Aunty</button>
+    </div>
+    <div class="otp-sent-msg" id="otp-sent">
+      ✅ OTP bheji ja rahi hai... <span id="del-label">SMS par</span><br>
+      <span style="font-size:11px;color:#666">👮 Click the traffic warden when he walks by!</span>
+    </div>
+    <p style="font-size:12px;color:#888;margin-bottom:12px">
+      Enter the 6-digit OTP below.<br>
+      <span style="color:#cc0000;font-size:10px">⚠️ Box #3 is upside down. Backspace deletes entire form.</span>
+    </p>
+    <div class="otp-inputs">
+      <input type="text" class="otp-digit" id="o0" maxlength="1" oninput="otpIn(0)" onkeydown="otpKey(event,0)">
+      <input type="text" class="otp-digit" id="o1" maxlength="1" oninput="otpIn(1)" onkeydown="otpKey(event,1)">
+      <input type="text" class="otp-digit" id="o2" maxlength="1" oninput="otpIn(2)" onkeydown="otpKey(event,2)">
+      <input type="text" class="otp-digit" id="o3" maxlength="1" oninput="otpIn(3)" onkeydown="otpKey(event,3)">
+      <input type="text" class="otp-digit" id="o4" maxlength="1" oninput="otpIn(4)" onkeydown="otpKey(event,4)">
+      <input type="text" class="otp-digit" id="o5" maxlength="1" oninput="otpIn(5)" onkeydown="otpKey(event,5)">
+    </div>
+    <div id="otp-err" style="color:red;font-size:12px;margin-bottom:10px;min-height:18px"></div>
+    <button class="otp-verify-btn" onclick="verifyOtp()">Verify OTP (Bismillah)</button>
+    <div style="font-size:11px;color:#999;margin-top:10px;font-style:italic">Hint: Click the traffic warden (👮) when he walks across the bottom!</div>
+  </div>
+  <div id="warden">
+    <div id="warden-body">👮</div>
+    <div id="warden-ticket">📋 CHALAN #6969</div>
+    <div id="warden-code"></div>
+    <div id="warden-hint">Click me! 👆</div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 5: FINALE ══════════ -->
+<div id="screen5" class="screen">
+  <div id="spinner"></div>
+  <div id="loading-txt">Verifying your humanity...</div>
+  <div id="finale-msg">
+    <h1>Program warr gaya.</h1>
+  </div>
+  <div id="finale-joke">
+    <em>(Just kidding. You survived. Welcome.)</em><br><br>
+    <div style="font-size:24px">🎉🇵🇰🎉</div>
+    <div style="margin-top:12px;font-size:12px;color:#666">
+      You have successfully completed the world's worst login experience.<br>
+      Your FCC Student Portal account remains inaccessible. As always.
+    </div>
+    <button onclick="location.reload()" style="margin-top:18px;padding:10px 20px;background:#1a2e6e;color:white;border:none;cursor:pointer;font-family:'Comic Sans MS',cursive;font-size:13px">
+      Phir se koshish karo 😭
+    </button>
+  </div>
+</div>
+
+<script>
+// STATE
+let rage=0,curScreen=1,failCount=0,rulesShown=1,passAttempts=0;
+let capAttempts=0,capRound=0,selectedCells=new Set();
+let otpCode='',wardenTimer=null,wardenX=-120,wardenRevealed=false;
+let ghab=0,erratic=0,lastMX=0,lastMY=0;
+let userName='',capPwd='',showingPass=false,popCount=0,delMethod='sms';
+
+const delLabels={
+  sms:'📱 SMS par',wa:'💬 WhatsApp par (Blue tick nahi aayega)',
+  pigeon:'🕊️ Kabootar k zariye (ETA: 3 days)',rick:'🛺 Rickshaw par (sunna…)',
+  dhol:'🥁 Dhol baja ke (neighbors se maafi maango)',aunty:'👩 Random Aunty call (lamba chalega)'
+};
+
+// RAGE METER
+function addRage(n){
+  rage=Math.max(0,Math.min(100,rage+n));
+  document.getElementById('rage-fill').style.width=rage+'%';
+  const lbl=rage<20?'Shukriya 🙏':rage<40?'Thoda Irritate 😤':rage<60?'Pareshan Ho Raha Hai 😠':rage<80?'Dil Karta Hai Screen Phekein 🤬':rage<95?'Aap Ne Ghabrana Nahi Hai 🫠':'SYSTEM CRASH IMMINENT 💀';
+  document.getElementById('rage-lbl').textContent=lbl;
+  if(rage>=55&&ghab===0){ghab=1;setTimeout(showGhab,800);}
+}
+
+// FAKE TIMER
+let timerN=4;
+(function tick(){document.getElementById('timer-n').textContent=timerN;timerN--;if(timerN<0)timerN=4;setTimeout(tick,900);})();
+
+// ROTATING LOGO
+const logos=['🏫','🏏','🐐','📡','🍚','🦜','🕌'];
+let logoI=0;
+setInterval(()=>{logoI=(logoI+1)%logos.length;document.getElementById('header-logo').textContent=logos[logoI];},3000);
+
+// MOUSE & CURSOR TRAIL
+document.addEventListener('mousemove',e=>{
+  const spd=Math.hypot(e.clientX-lastMX,e.clientY-lastMY);
+  if(spd>35)erratic++;
+  if(erratic>25&&ghab===0){ghab=1;showGhab();}
+  lastMX=e.clientX;lastMY=e.clientY;
+  if(Math.random()<0.2)makeDot(e.clientX,e.clientY);
+});
+function makeDot(x,y){
+  const d=document.createElement('div');d.className='c-dot';
+  d.style.cssText='left:'+x+'px;top:'+y+'px';
+  document.body.appendChild(d);
+  setTimeout(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),500);},80);
+}
+
+// DODGE BUTTONS
+function makeDodge(id){
+  const b=document.getElementById(id);if(!b)return;
+  b.addEventListener('mouseenter',()=>{
+    if(Math.random()<0.65){
+      b.style.position='fixed';
+      b.style.left=(20+Math.random()*(window.innerWidth-200))+'px';
+      b.style.top=(60+Math.random()*(window.innerHeight-120))+'px';
+      b.style.zIndex='8000';addRage(6);
+    }
+  });
+}
+setTimeout(()=>{makeDodge('btn-b');makeDodge('btn-c');},800);
+
+// INITIAL CAPTCHA
+const caps=[{q:'3 × 7 = ?',a:21},{q:'√144 = ?',a:12},{q:'2⁵ = ?',a:32},{q:'100 ÷ 4 = ?',a:25}];
+let capI=0;
+function checkCap0(){
+  const v=parseInt(document.getElementById('cap-ans').value);
+  if(v===caps[capI].a){
+    capI++;
+    if(capI>=caps.length){
+      document.getElementById('init-captcha').style.display='none';
+      const f=document.getElementById('main-form');f.style.opacity='1';f.style.pointerEvents='auto';
+      popup('✅ Mashallah! Robot nahi hain aap. Magar login mushkil rahega.',250,250);
+    }else{
+      document.getElementById('cap-q').textContent=caps[capI].q;
+      document.getElementById('cap-ans').value='';
+      showEl('cap0-ok',true);showEl('cap0-err',false);addRage(8);
+    }
+  }else{showEl('cap0-err',true);showEl('cap0-ok',false);shake(document.getElementById('init-captcha'));addRage(10);}
+}
+
+// SCREEN 1
+function onUname(){userName=document.getElementById('uname').value;addRage(1);}
+function onPwd1(){addRage(1);}
+function capslockCheck(e){
+  document.getElementById('capslock-warn').style.display=(e.getModifierState&&e.getModifierState('CapsLock'))?'block':'none';
+}
+
+function loginBtn(type){
+  const un=document.getElementById('uname').value.trim();
+  const pt=document.getElementById('potato').value;
+  if(type==='real'){
+    if(!un){errFlash('s1-err','⚠️ Roll number toh dalen bhai!');addRage(12);return;}
+    if(!pt){errFlash('s1-err','🥔 Biryani aloo count zarori hai! System accept nahi karega.');addRage(15);return;}
+    capPwd=document.getElementById('pwd1').value;
+    runFakeProgress(()=>goTo(2));return;
+  }
+  if(type==='confuse'){alert('Aap ne "LOGIN???" dabaya. Aap khud confuse hain. Theek hai.');addRage(12);popup('ERROR 404: Certainty not found',120,350);}
+  else if(type==='not'){alert('"NOT LOGIN" matlab logout. Par aap log in hi nahi thay. Wah.');addRage(15);}
+  else if(type==='maybe'){alert('maybe continue... soch rahe hain... nahi.');addRage(10);}
+  else if(type==='secret'){alert('🏆 INVISIBLE BUTTON FOUND!\nDukhad baat: phir bhi kuch nahi hoga.');addRage(5);}
+  failCount++;if(failCount>=3)showGhab();
+}
+
+function runFakeProgress(done){
+  const wrap=document.getElementById('fake-progress-wrap');
+  const fill=document.getElementById('fake-progress-fill');
+  const lbl=document.getElementById('fake-progress-label');
+  wrap.style.display='block';let pct=0;
+  const iv=setInterval(()=>{
+    if(pct<99){pct+=(pct<90?3:0.15);fill.style.width=pct.toFixed(1)+'%';lbl.textContent='Loading... '+Math.floor(pct)+'%';}
+    else{clearInterval(iv);lbl.textContent='⚠️ Loading... 99% (Ruk gaya... hamesha ki tarah)';
+      setTimeout(()=>{wrap.style.display='none';fill.style.width='0%';done();},2200);}
+  },40);addRage(10);
+}
+
+// SCREEN TRANSITIONS
+function goTo(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen'+n).classList.add('active');
+  curScreen=n;window.scrollTo(0,0);
+  if(n===3)setupCap();if(n===4)setupOtp();if(n===5)runFinale();
+}
+
+// SCREEN 2: PASSWORD
+function checkPass(){
+  const p=document.getElementById('pass-field').value;let err='';
+  if(rulesShown>=1){const ok=p.length>=8;setRule('r1',ok,'Must be at least 8 characters');if(!ok)err='At least 8 characters chahiye!';}
+  if(rulesShown>=2){const ok=/[!@#$%^&*()\-_=+\[\]{};:'",.<>?\/\\|`~]/.test(p);setRule('r2',ok,'Must contain a special character (!@#$%^&*)');if(!ok&&!err)err='Special character chahiye! (!@#$%^&*)';}
+  if(rulesShown>=3){const ok=/[IVXLCDMivxlcdm]/.test(p);setRule('r3',ok,'Must contain a Roman numeral (I V X L C D M)');if(!ok&&!err)err='Roman numeral chahiye! (I, V, X, L, C, D, M)';}
+  if(rulesShown>=4){
+    const digits=p.replace(/\D/g,'').split('').map(Number);const sum=digits.reduce((a,b)=>a+b,0);
+    const ok=digits.length>0&&sum===27;
+    setRule('r4',ok,`All numeric digits must sum to exactly 27 💀 (yours: ${sum})`);
+    if(!ok&&!err)err=`Digits sum = ${sum}, chahiye exactly 27! Sochte raho 💀`;
+  }
+  if(rulesShown>=5){
+    const name=(userName||'Ibrahim').toLowerCase().replace(/[^a-z]/g,'');
+    const letters=[...new Set(name)];const ok=!letters.some(l=>p.toLowerCase().includes(l));
+    setRule('r5',ok,`Cannot contain any letter from your own name (${userName||'Ibrahim'})`);
+    if(!ok&&!err)err='Apne naam ke letters forbidden hain! 🤦';
+  }
+  document.getElementById('rule-err').textContent=err;
+  const fake=Math.min(55,p.length*4);
+  document.getElementById('str-fill').style.width=fake+'%';
+  document.getElementById('str-fill').style.background=fake<20?'red':fake<40?'orange':'#cc6600';
+  const sl=['Bhai seriously?','Thoda better','Hmm...','Abhi bhi kamzor','Almost... nahi'];
+  document.getElementById('str-label').textContent='Strength: '+sl[Math.min(4,Math.floor(p.length/3))];
+  return !err&&rulesShown>=5;
+}
+
+function setRule(id,pass,text){
+  const el=document.getElementById(id);if(!el)return;
+  el.className=pass?'r-pass':'r-fail';el.textContent=(pass?'✅ ':'❌ ')+text;
+}
+
+function submitPass(){
+  passAttempts++;
+  document.getElementById('pass-attempts').textContent='Attempt '+passAttempts+(passAttempts>3?' 😤 Himmat hai aapki!':'');
+  addRage(14);
+  const allOk=checkPass();
+  if(!allOk){
+    if(rulesShown<5){
+      rulesShown++;
+      const el=document.getElementById('r'+rulesShown);el.classList.remove('r-hide');el.classList.add('r-fail');
+      const reveals={2:'🤫 Surprise! Ek aur rule tha jo hum ne bataya nahi...',3:'😈 Acha acha, aur ek chhupa hua rule hai...',4:'💀 SHAITANI RULE UNLOCKED: Digits must sum to 27. EXACTLY.',5:'👁️ FINAL BOSS: Aapke naam ke har harf ki manaat hai. Sorry.'};
+      popup(reveals[rulesShown]||'Try again!',100+Math.random()*400,100+Math.random()*300);
+    }
+    shake(document.getElementById('pass-box'));return;
+  }
+  capPwd=document.getElementById('pass-field').value;goTo(3);
+}
+
+function toggleVis(){
+  showingPass=!showingPass;
+  document.getElementById('pass-field').type=showingPass?'text':'password';
+  document.getElementById('vis-toggle').textContent=showingPass?'👁️':'😭';
+}
+
+// SCREEN 3: CAPTCHA
+const capRounds=[
+  {inst:'🍚 Select all images containing <strong>Elaichi (Cardamom)</strong> in the Biryani.<br><span style="font-size:11px;color:#999">(It\'s there. Somewhere. Heavily camouflaged.)</span>',
+   cells:[{e:'🍚',l:'Plain rice',ok:false},{e:'🥩',l:'Gosht tukra',ok:false},{e:'🍚🌿',l:'Rice + kuch',ok:true},{e:'🥕',l:'Gajar',ok:false},{e:'🧅',l:'Pyaaz',ok:false},{e:'🍚✨',l:'Rice + spice?',ok:true},{e:'🥔',l:'Aloo (zarori)',ok:false},{e:'🫙',l:'Masala jar',ok:false},{e:'🫚✨',l:'Oil + elaichi?',ok:true}]},
+  {inst:'⚡ Click all sectors currently experiencing <strong>Load Shedding</strong>.<br><span style="font-size:11px;color:#999">(Warning: clicking a blacked-out sector simulates the experience)</span>',
+   cells:[{e:'💡',l:'Sector F-7',ok:false},{e:'🕯️',l:'Sector G-9 💀',ok:true},{e:'💡',l:'Sector E-11',ok:false},{e:'🕯️',l:'Sector I-8 💀',ok:true},{e:'💡',l:'Sector H-13',ok:false},{e:'🌑',l:'Blue Area 💀',ok:true},{e:'💡',l:'GHQ (never)',ok:false},{e:'🕯️',l:'Lahore 💀',ok:true},{e:'💡',l:'Bahria Town',ok:false}]}
+];
+
+function setupCap(){capRound=0;renderCap();}
+function renderCap(){
+  const rd=capRounds[capRound];
+  document.getElementById('cap-inst').innerHTML=rd.inst;
+  const grid=document.getElementById('cap-grid');grid.innerHTML='';selectedCells.clear();
+  rd.cells.forEach((cell,i)=>{
+    const d=document.createElement('div');d.className='cap-cell';
+    d.innerHTML='<span>'+cell.e+'</span><span class="cell-label">'+cell.l+'</span>';
+    d.addEventListener('click',()=>toggleCell(d,i,cell.ok));
+    grid.appendChild(d);
+  });
+}
+function toggleCell(el,i,ok){
+  if(el.classList.contains('selected')){el.classList.remove('selected');selectedCells.delete(i);}
+  else{
+    el.classList.add('selected');selectedCells.add(i);
+    if(!ok){capPwd=capPwd.slice(0,-1);el.classList.add('wrong-blink');setTimeout(()=>el.classList.remove('wrong-blink'),500);addRage(8);}
+    if(capRound===1&&ok)triggerBlackout();
+  }
+}
+function verifyCap(){
+  capAttempts++;document.getElementById('cap-tries').textContent='Attempts: '+capAttempts+' / ∞';addRage(12);
+  const rd=capRounds[capRound];
+  const correct=new Set(rd.cells.map((c,i)=>c.ok?i:-1).filter(i=>i>=0));
+  let right=true;
+  correct.forEach(i=>{if(!selectedCells.has(i))right=false;});
+  selectedCells.forEach(i=>{if(!correct.has(i))right=false;});
+  const errEl=document.getElementById('cap-err');errEl.style.display='block';
+  if(right&&capRound===0){
+    errEl.style.color='green';errEl.textContent='✅ Wah beta wah... Nobel Prize. Ab ek aur round:';addRage(5);
+    setTimeout(()=>{capRound=1;renderCap();errEl.style.display='none';},1600);
+  }else if(right&&capRound===1){
+    errEl.style.color='green';errEl.textContent='✅ Mashallah! Insaan sabit ho gaye aap!';
+    setTimeout(()=>goTo(4),1500);
+  }else{
+    errEl.style.color='red';errEl.textContent='❌ Aap se na ho payega 😔 CAPTCHA refresh ho gaya.';
+    setTimeout(()=>{renderCap();errEl.style.display='none';},2000);
+  }
+}
+
+// BLACKOUT
+function triggerBlackout(){
+  const ov=document.getElementById('blackout');ov.classList.add('on');let c=3;
+  document.getElementById('blackout-count').textContent=c;
+  const iv=setInterval(()=>{c--;document.getElementById('blackout-count').textContent=c;if(c<=0){clearInterval(iv);ov.classList.remove('on');addRage(20);}},1000);
+}
+
+// SCREEN 4: OTP
+function selDel(el,type){document.querySelectorAll('.d-opt').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');delMethod=type;addRage(3);}
+function setupOtp(){
+  otpCode=String(Math.floor(100000+Math.random()*900000));
+  setTimeout(()=>{
+    document.getElementById('otp-sent').style.display='block';
+    document.getElementById('del-label').textContent=delLabels[delMethod]||'SMS par';
+  },2000);
+  setTimeout(startWarden,3500);
+}
+function startWarden(){
+  const w=document.getElementById('warden');w.classList.add('on');
+  wardenX=-120;w.style.left='-120px';wardenRevealed=false;
+  document.getElementById('warden-ticket').style.display='none';
+  document.getElementById('warden-code').style.display='none';
+  w.onclick=revealOtp;
+  wardenTimer=setInterval(()=>{
+    wardenX+=2;w.style.left=wardenX+'px';
+    if(wardenX>window.innerWidth*0.25&&!wardenRevealed){wardenRevealed=true;document.getElementById('warden-ticket').style.display='block';}
+    if(wardenX>window.innerWidth+60){
+      clearInterval(wardenTimer);w.classList.remove('on');
+      setTimeout(()=>{wardenX=-120;wardenRevealed=false;startWarden();},5000);
+    }
+  },16);
+}
+function revealOtp(){
+  clearInterval(wardenTimer);
+  document.getElementById('warden-ticket').style.display='none';
+  const code=document.getElementById('warden-code');code.style.display='block';code.textContent=otpCode;
+  document.getElementById('warden-hint').textContent='^ Yeh hai aapka OTP!';addRage(5);
+  setTimeout(()=>document.getElementById('warden').classList.remove('on'),6000);
+}
+function otpIn(i){
+  const cur=document.getElementById('o'+i);if(cur.value&&i<5)document.getElementById('o'+(i+1)).focus();addRage(2);
+  if(Math.random()<0.18){const rnd=Math.floor(Math.random()*6);document.getElementById('o'+rnd).focus();}
+}
+function otpKey(e,i){
+  if(e.key==='Backspace'){
+    e.preventDefault();for(let j=0;j<6;j++)document.getElementById('o'+j).value='';
+    document.getElementById('o0').focus();popup('💀 Backspace ne poora OTP delete kar diya.\nYeh feature hai, bug nahi.',200,200);addRage(22);
+  }
+}
+function verifyOtp(){
+  const entered=Array.from({length:6},(_,i)=>document.getElementById('o'+i).value).join('');
+  const errEl=document.getElementById('otp-err');
+  if(entered===otpCode){goTo(5);}
+  else{
+    errEl.style.color='red';errEl.textContent='❌ Yeh kya tareeqa hai 😭 OTP galat hai!';addRage(20);
+    setTimeout(()=>{
+      errEl.textContent='❌ OTP expire ho gaya. Phir se warden ka intezaar karo.';
+      otpCode=String(Math.floor(100000+Math.random()*900000));
+      for(let j=0;j<6;j++)document.getElementById('o'+j).value='';
+      startWarden();
+    },2000);
+  }
+}
+
+// SCREEN 5: FINALE
+function runFinale(){
+  const msgs=['Verifying your humanity...','Checking biryani aloo count...','Consulting WAPDA schedule...','Bribing database admin...','Program compile ho raha hai...','Inshallah...','Almost...'];
+  let mi=0;const lt=document.getElementById('loading-txt');
+  const iv=setInterval(()=>{
+    mi++;if(mi<msgs.length){lt.textContent=msgs[mi];}
+    else{clearInterval(iv);document.getElementById('spinner').style.display='none';lt.style.display='none';document.getElementById('finale-msg').style.display='block';setTimeout(()=>document.getElementById('finale-joke').style.display='block',3000);}
+  },800);
+}
+
+// GHABRANA MODAL
+function showGhab(){document.getElementById('ghabrana-modal').classList.add('on');}
+document.getElementById('ghab-yes').addEventListener('click',()=>{
+  const m=document.getElementById('ghabrana-modal');m.style.transition='opacity 0.5s';m.style.opacity='0';
+  setTimeout(()=>{m.classList.remove('on');m.style.opacity='';m.style.transition='';ghab++;popup('🎙️ "Aap ne ghabrana nahi hai"\n— Imran Khan\n\n(Nothing is fixed. Keep going.)',280,180);},500);
+});
+
+// FAKE POPUPS
+function popup(msg,x,y){
+  if(popCount>7)return;popCount++;
+  const d=document.createElement('div');d.className='fake-pop';
+  d.style.left=Math.min(x,window.innerWidth-260)+'px';d.style.top=Math.max(60,Math.min(y,window.innerHeight-120))+'px';
+  d.innerHTML='<span class="fake-pop-x" onclick="this.parentElement.remove();popCount--">✕</span><div style="font-weight:bold;color:#1a2e6e;margin-bottom:6px">⚠️ SYSTEM NOTICE</div><div style="white-space:pre-line">'+msg+'</div><div style="margin-top:8px;display:flex;gap:4px"><button onclick="this.closest(\'.fake-pop\').remove();popCount--" style="padding:3px 8px;cursor:pointer;font-family:inherit">OK</button><button onclick="this.closest(\'.fake-pop\').remove();popCount--" style="padding:3px 8px;cursor:pointer;font-family:inherit">Cancel</button></div>';
+  document.body.appendChild(d);
+}
+
+// UTILITY
+function errFlash(id,msg){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
+function showEl(id,show){document.getElementById(id).style.display=show?'block':'none';}
+function shake(el){if(!el)return;el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'),500);}
+
+// EASTER EGGS
+function easterEggLogo(){alert('🇵🇰 Made with suffering in Pakistan 🇵🇰\n\nFRM PROD DB v.6.6.6\nPain Technologies™\n\nAll bugs are features.\nAll features are bugs.');}
+document.addEventListener('input',e=>{if((e.target.value||'').toLowerCase().includes('admin'))popup('🐐 ADMIN DETECTED! 🐐\nBakra kharid lo pehle login karne se pehle.',300,200);});
+let kseq='';const KONAMI='ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRight';
+document.addEventListener('keydown',e=>{
+  kseq+=e.key;if(kseq.length>80)kseq=kseq.slice(-40);
+  if(kseq.includes(KONAMI)){kseq='';alert('🎊 KONAMI CODE! Shadi ki shehnai baj rahi hai 🎺\n(Wedding music plays here)\n\nExtra marks for you!');}
+  if(e.getModifierState&&e.getModifierState('CapsLock'))document.getElementById('capslock-warn').style.display='block';
+  else document.getElementById('capslock-warn').style.display='none';
+});
+
+// SCHEDULED POPUPS
+setTimeout(()=>popup('🔔 Aapka CNIC expire hone wala hai (shayad)',window.innerWidth-270,280),18000);
+setTimeout(()=>popup('💊 Therapy recommend ki jaati hai is login ke baad.',100,400),40000);
+
+// WEB AUDIO BEEPS
+function beep(f,dur,type){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const g=ctx.createGain();osc.connect(g);g.connect(ctx.destination);osc.type=type||'square';osc.frequency.value=f||440;g.gain.setValueAtTime(0.25,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur/1000);osc.start();osc.stop(ctx.currentTime+dur/1000);}catch(e){}}
+document.querySelectorAll('button').forEach(b=>{b.addEventListener('click',()=>{if(Math.random()<0.35)beep(150+Math.random()*700,120,'sawtooth');});});
+document.getElementById('btn-b').addEventListener('click',()=>beep(180,300,'square'));
+document.getElementById('btn-c').addEventListener('click',()=>beep(150,400,'square'));
+</script>
+</body>
+</html>
