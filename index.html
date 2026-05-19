@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NADRA — Citizen Login Portal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:Arial,sans-serif;background:#f0f2f0;color:#222}
+
+/* TOP BAR */
+#nadra-topbar{background:#004d20;color:#fff;font-size:11px;padding:4px 16px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:200;}
+#nadra-topbar .tl{display:flex;gap:14px;}
+#nadra-topbar a{color:#aaddbb;text-decoration:none;}
+#nadra-topbar a:hover{text-decoration:underline;}
+
+/* HEADER */
+#nadra-header{background:linear-gradient(180deg,#006633 0%,#004d26 100%);padding:0;position:relative;z-index:200;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+.header-inner{display:flex;align-items:center;max-width:1100px;margin:0 auto;padding:10px 20px;gap:20px;}
+.nadra-shield{flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.header-brand{flex:1;}
+.header-brand .gov-line{font-size:11px;color:#aaddbb;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.header-brand h1{font-size:20px;font-weight:700;color:#fff;letter-spacing:1px;text-transform:uppercase;line-height:1.1;}
+.header-brand .tagline{font-size:11px;color:#cceedd;margin-top:4px;font-style:italic;}
+.header-right{text-align:right;color:#aaddbb;font-size:11px;}
+.header-right .ver{font-size:10px;margin-top:4px;color:#88bb99;}
+
+/* NAVIGATION */
+#nadra-nav{background:#005529;border-bottom:3px solid #00994d;position:relative;z-index:200;}
+.nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;}
+#nadra-nav a{display:inline-block;padding:10px 16px;color:#cceedd;font-size:13px;text-decoration:none;border-right:1px solid rgba(255,255,255,.1);transition:background .15s,color .15s;}
+#nadra-nav a:hover,#nadra-nav a.active{background:#006633;color:#fff;}
+#nadra-nav .nav-right{margin-left:auto;font-size:11px;color:#88bb99;padding:0 16px;}
+
+/* BREADCRUMB & ANNOUNCE */
+#breadcrumb{background:#eef7ee;border-bottom:1px solid #ccdccc;font-size:12px;color:#555;padding:6px 20px;position:relative;z-index:200;}
+#breadcrumb span{color:#006633;}
+.announce-bar{background:#e8f5e9;border-bottom:1px solid #a5d6a7;padding:7px 20px;font-size:12px;color:#2e7d32;display:flex;align-items:center;gap:8px;position:relative;z-index:200;}
+.announce-bar .a-tag{background:#006633;color:#fff;padding:2px 8px;font-size:11px;font-weight:700;letter-spacing:.5px;margin-right:4px;flex-shrink:0;}
+
+/* PAGE WRAPPER */
+#page-wrapper{position:relative;min-height:calc(100vh - 200px);background:#f0f2f0;}
+
+/* SCREEN SYSTEM */
+.screen{display:none;padding:28px 20px 50px;max-width:1100px;margin:0 auto;}
+.screen.active{display:block;}
+
+/* TWO COLUMN */
+.two-col{display:flex;gap:22px;align-items:flex-start;}
+.two-col .main-col{flex:1;min-width:0;}
+@media(max-width:700px){.two-col{flex-direction:column;}.info-sidebar{max-width:100%;min-width:0;}}
+
+/* NADRA PANEL */
+.nadra-panel{background:#fff;border:1px solid #c8d8c8;box-shadow:0 1px 6px rgba(0,80,0,.1);}
+.panel-title{background:linear-gradient(180deg,#006633,#004d26);color:#fff;padding:12px 20px;font-size:14px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:8px;}
+.panel-body{padding:22px 26px;}
+
+/* FORM FIELDS */
+.n-field{margin-bottom:16px;}
+.n-field label{display:block;font-size:13px;font-weight:700;color:#333;margin-bottom:5px;}
+.n-field label .req{color:#cc0000;margin-left:2px;}
+.n-field label .hint{display:block;font-size:11px;font-weight:normal;color:#777;margin-top:1px;}
+.n-field input,.n-field select{width:100%;padding:9px 12px;border:1px solid #aaa;background:#fff;font-size:14px;font-family:Arial,sans-serif;color:#222;outline:none;transition:border-color .15s,box-shadow .15s;}
+.n-field input:focus,.n-field select:focus{border-color:#006633;box-shadow:0 0 0 2px rgba(0,102,51,.12);}
+.n-field input::placeholder{color:#bbb;font-size:13px;}
+.n-field.security input{border-color:#b8860b;background:#fffef5;}
+.n-field.security label{color:#7a5800;}
+.n-field.security .hint{color:#b8860b;}
+.field-hint{font-size:11px;color:#888;margin-top:4px;font-family:'Courier New',monospace;}
+
+/* BUTTONS */
+.btn-green{width:100%;padding:11px;background:linear-gradient(180deg,#007a3d,#005529);color:#fff;border:1px solid #004d20;font-size:14px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:Arial,sans-serif;transition:background .15s;}
+.btn-green:hover{background:linear-gradient(180deg,#009144,#006633);}
+.btn-outline{width:100%;padding:9px;background:#fff;color:#006633;border:1px solid #006633;font-size:13px;cursor:pointer;margin-top:8px;font-family:Arial,sans-serif;transition:background .15s;}
+.btn-outline:hover{background:#eef7ee;}
+
+/* Confusing login buttons */
+.desi-buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.desi-buttons button{padding:9px 4px;font-size:12px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;letter-spacing:.3px;}
+.db-real{background:linear-gradient(180deg,#007a3d,#005529);color:#fff;border:1px solid #004d20;}
+.db-real:hover{background:#006633;}
+.db-ghost{background:#fff;color:#555;border:1px solid #aaa;}
+.db-invisible{opacity:0;pointer-events:auto;}
+
+/* NOTICE BOX */
+.notice-box{background:#fff8dc;border-left:4px solid #cc9900;padding:10px 14px;font-size:12px;color:#664400;margin-bottom:16px;}
+.notice-box b{display:block;margin-bottom:4px;font-size:13px;}
+.notice-box.red{background:#fff0f0;border-left-color:#cc0000;color:#660000;}
+
+/* SECURITY BADGES */
+.sec-badges{display:flex;gap:10px;margin:14px 0 6px;flex-wrap:wrap;}
+.sec-badge{background:#f0f7f0;border:1px solid #a5d6a7;padding:4px 10px;font-size:11px;color:#2e7d32;}
+
+/* INFO SIDEBAR */
+.info-sidebar{min-width:220px;max-width:250px;}
+.is-block{background:#fff;border:1px solid #c8d8c8;padding:13px 15px;margin-bottom:12px;}
+.is-block h4{color:#006633;font-size:13px;font-weight:700;border-bottom:2px solid #006633;padding-bottom:4px;margin-bottom:8px;}
+.is-block p,.is-block li{font-size:12px;color:#555;line-height:1.6;}
+.is-block ul{padding-left:16px;}
+.is-block .cl{display:flex;gap:6px;align-items:center;font-size:12px;color:#333;margin-top:4px;}
+.is-block .cl b{color:#006633;}
+
+/* OTP SCREEN */
+.otp-notice{background:#e8f5e9;border:1px solid #4caf50;padding:12px 14px;font-size:13px;color:#2e7d32;margin-bottom:18px;}
+.otp-code{display:inline;background:#fff3cd;color:#856404;border:1px dashed #b8860b;padding:1px 8px;font-family:'Courier New',monospace;font-size:15px;font-weight:700;letter-spacing:2px;}
+.otp-inputs{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:12px 0 14px;}
+.otp-inputs input{width:38px;height:46px;text-align:center;font-size:18px;font-weight:700;background:#fff;color:#006633;border:2px solid #aaa;outline:none;font-family:'Courier New',monospace;transition:border-color .15s;}
+.otp-inputs input:focus{border-color:#006633;box-shadow:0 0 0 2px rgba(0,102,51,.15);}
+.otp-inputs input.upside{transform:rotate(180deg);border-color:#cc0000;}
+.otp-inputs input.tiny{width:28px;height:34px;font-size:12px;border-color:#ddd;opacity:.65;}
+.otp-fine{font-size:11px;color:#666;text-align:center;margin-top:8px;line-height:1.5;}
+.otp-resend{font-size:12px;color:#555;text-align:center;margin-top:10px;}
+.otp-resend a{color:#006633;text-decoration:underline;cursor:pointer;}
+
+/* ======= SCREEN 3 — NADRA WHITE BUT ABSURD ======= */
+.cursed-panel{background:#fff;border:1px solid #c8d8c8;box-shadow:0 1px 6px rgba(0,80,0,.1);}
+
+/* Meters (patience depleting) */
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.meter{background:#f9f9f9;border:1px solid #ddd;padding:8px 10px;font-size:11px;}
+.meter .lbl{display:flex;justify-content:space-between;margin-bottom:4px;font-weight:700;color:#555;letter-spacing:.3px;}
+.meter .bar{height:5px;background:#eee;overflow:hidden;}
+.meter .fill{height:100%;background:linear-gradient(90deg,#006633,#ffcc00,#cc0000);width:0%;transition:width .4s;}
+.meter.dmg .fill{background:linear-gradient(90deg,#006633,#ff6600,#cc0000);}
+
+/* Cursed form fields */
+.c-field{margin-bottom:14px;}
+.c-field label{display:block;font-size:13px;font-weight:700;color:#333;margin-bottom:5px;}
+.c-field label .micro{display:block;font-size:11px;font-weight:normal;color:#cc0000;margin-top:2px;line-height:1.5;}
+.c-field input{width:100%;padding:9px 12px;border:1px solid #aaa;background:#fff;font-size:14px;font-family:Arial,sans-serif;color:#222;outline:none;transition:border-color .15s;}
+.c-field input:focus{border-color:#006633;}
+.overlap-wrap{position:relative;height:62px;}
+.overlap-wrap input:nth-child(1){position:absolute;top:0;left:0;width:70%;}
+.overlap-wrap input:nth-child(2){position:absolute;top:20px;left:18%;width:70%;transform:rotate(-2deg);border-color:#b8860b;}
+.error-msg{color:#cc0000;font-size:12px;margin-top:5px;background:#fff0f0;padding:5px 8px;border-left:3px solid #cc0000;display:none;}
+.error-msg.show{display:block;}
+
+/* IMAGE CAPTCHA */
+.captcha-wrap{background:#f5f5f5;border:1px solid #ddd;padding:14px;margin:16px 0;}
+.captcha-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.captcha-hdr-title{font-size:13px;font-weight:700;color:#333;}
+.captcha-diff{background:#cc0000;color:#fff;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.5px;}
+.captcha-prompt{font-size:13px;color:#333;margin-bottom:10px;line-height:1.5;}
+.captcha-prompt strong{color:#004d20;}
+.captcha-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.captcha-tile{aspect-ratio:1;overflow:hidden;cursor:pointer;border:3px solid transparent;position:relative;background:#ddd;}
+.captcha-tile img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;transition:filter .15s;}
+.captcha-tile .lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:9px;text-align:center;padding:3px 0;letter-spacing:.3px;text-transform:uppercase;}
+.captcha-tile:hover{border-color:#004d20;}
+.captcha-tile:hover img{filter:brightness(1.08);}
+.captcha-tile.picked{border-color:#006633;}
+.captcha-tile.picked::after{content:'';position:absolute;top:5px;right:5px;width:16px;height:16px;background:#006633;border-radius:50%;border:2px solid #fff;}
+.captcha-tile.dodge{transition:transform .12s;}
+
+/* Eye */
+.eye{position:absolute;top:8px;right:8px;width:44px;height:44px;background:#fff;border-radius:50%;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15);border:2px solid #006633;z-index:3;}
+.pupil{width:20px;height:20px;background:#1a1a1a;border-radius:50%;position:relative;transition:transform .08s;}
+.pupil::after{content:'';position:absolute;top:3px;left:3px;width:7px;height:7px;background:#fff;border-radius:50%;}
+
+/* Runaway button */
+.submit-runaway{position:absolute;bottom:-50px;right:0;padding:7px 14px;background:#006633;color:#fff;border:1px solid #004d20;font-size:12px;cursor:pointer;font-family:Arial,sans-serif;}
+
+/* Progress timer */
+.progress-down{margin-top:14px;height:5px;background:#eee;border:1px solid #ddd;overflow:hidden;}
+.progress-down::after{content:'';display:block;height:100%;width:100%;background:linear-gradient(90deg,#006633,#ffcc00,#cc0000);animation:shrink 5s infinite linear;}
+@keyframes shrink{0%{width:100%}100%{width:0%}}
+.progress-lbl{font-size:11px;color:#888;margin-top:4px;}
+
+/* Checkbox row */
+.c-row{display:flex;justify-content:space-between;align-items:center;margin:12px 0;font-size:13px;}
+.c-row label{color:#555;display:flex;gap:6px;align-items:center;cursor:pointer;}
+.micro-link{font-size:12px;color:#006633;text-decoration:underline;cursor:pointer;}
+
+/* Action buttons */
+.c-actions{display:flex;gap:8px;margin-top:10px;position:relative;align-items:stretch;}
+.btn-c-main{flex:1;padding:11px;background:linear-gradient(180deg,#007a3d,#005529);color:#fff;border:1px solid #004d20;font-size:13px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;letter-spacing:.3px;}
+.btn-c-main:hover{background:#009144;}
+.btn-c-ghost{padding:10px 14px;background:#fff;color:#555;border:1px solid #bbb;font-size:12px;cursor:pointer;font-family:Arial,sans-serif;}
+
+/* ======= SCREEN 4 — SUCCESS ======= */
+.success-panel{background:#fff;border:1px solid #c8d8c8;box-shadow:0 1px 6px rgba(0,80,0,.1);text-align:center;max-width:520px;margin:20px auto;}
+.success-icon{width:58px;height:58px;background:#006633;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#fff;font-size:20px;font-weight:700;letter-spacing:1px;}
+.success-title{font-size:22px;font-weight:700;color:#006633;margin-bottom:10px;}
+.success-msg{font-size:14px;color:#333;margin-bottom:8px;line-height:1.7;}
+.success-sub{font-size:12px;color:#888;font-style:italic;}
+.fake-progress{margin-top:20px;height:4px;background:#eee;overflow:hidden;}
+.fake-progress-bar{height:100%;width:0;background:linear-gradient(90deg,#006633,#00994d);animation:fakeLoad 2.5s linear forwards;}
+@keyframes fakeLoad{0%{width:0%}85%{width:92%}100%{width:92%}}
+
+/* ======= SCREEN 5 — FINAL ======= */
+.final-panel{background:#fff;border:1px solid #c8d8c8;box-shadow:0 1px 6px rgba(0,80,0,.1);max-width:520px;margin:20px auto;}
+.final-body{padding:28px 26px;text-align:center;}
+.final-title{font-size:20px;font-weight:700;color:#333;margin-bottom:12px;}
+.final-msg{font-size:14px;color:#555;margin-bottom:22px;line-height:1.8;}
+.final-msg b{color:#006633;}
+.final-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.final-buttons button{padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;border:1px solid #004d20;background:linear-gradient(180deg,#007a3d,#005529);color:#fff;}
+.final-buttons button:hover{background:#009144;}
+.final-buttons .b2{background:#fff;color:#006633;border-color:#006633;}
+.final-buttons .b2:hover{background:#eef7ee;}
+.final-buttons .b3{background:#fff3cd;color:#856404;border-color:#b8860b;}
+.final-buttons .b3:hover{background:#ffe8a0;}
+.final-buttons .b4{background:#fff0f0;color:#cc0000;border-color:#cc0000;}
+.final-buttons .b4:hover{background:#ffe0e0;}
+.final-stats{font-size:11px;color:#aaa;padding-top:12px;border-top:1px solid #eee;}
+
+/* ======= MODALS & POPUPS (all NADRA official style) ======= */
+
+/* Backdrop */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:100;}
+.modal-overlay.active{display:flex;}
+
+/* Modal box */
+.modal-box{width:92%;max-width:480px;background:#fff;border:1px solid #c8d8c8;box-shadow:0 6px 28px rgba(0,0,0,.2);overflow:hidden;}
+.modal-header{background:linear-gradient(180deg,#006633,#004d26);color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
+.modal-header h2{font-size:14px;font-weight:700;letter-spacing:.3px;}
+.modal-header .mh-close{background:none;border:none;color:#cceedd;font-size:18px;cursor:pointer;padding:0 2px;line-height:1;}
+.modal-body{padding:20px 22px;}
+.modal-body p{font-size:13px;color:#333;line-height:1.65;margin-bottom:10px;}
+.pw-pill{display:inline-block;font-family:'Courier New',monospace;font-size:18px;background:#f9f9f9;color:#006633;padding:8px 16px;border:1px dashed #006633;margin:4px 0 4px;letter-spacing:2px;font-weight:700;}
+.modal-fine{font-size:11px;color:#888;margin-top:10px;font-style:italic;border-top:1px solid #eee;padding-top:10px;}
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+.modal-actions .ma-p{flex:1;padding:10px;background:linear-gradient(180deg,#007a3d,#005529);color:#fff;border:1px solid #004d20;font-family:Arial,sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.modal-actions .ma-s{flex:1;padding:10px;background:#fff;color:#555;border:1px solid #aaa;font-family:Arial,sans-serif;font-size:13px;cursor:pointer;}
+
+/* Nag popup */
+.nag{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff0f8;border:3px solid hotpink;box-shadow:0 6px 24px rgba(255,105,180,.4);max-width:360px;width:90%;z-index:60;display:none;overflow:hidden;}
+.nag.show{display:block;animation:pop .2s ease-out;}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.88)}to{transform:translate(-50%,-50%) scale(1)}}
+.nag-hdr{background:linear-gradient(180deg,hotpink,deeppink);color:#fff;padding:10px 16px;font-size:14px;font-weight:700;font-family:'Comic Sans MS',cursive,sans-serif;letter-spacing:1px;text-shadow:1px 1px 0 #c2006a;}
+.nag-body{padding:14px 16px;font-size:14px;color:#c2006a;line-height:1.8;font-family:'Comic Sans MS',cursive,sans-serif;background:#fff0f8;}
+.nag-foot{display:flex;gap:8px;padding:0 16px 14px;background:#fff0f8;}
+.nag-foot button{padding:7px 14px;font-family:'Comic Sans MS',cursive,sans-serif;font-size:13px;cursor:pointer;border:2px solid deeppink;background:linear-gradient(180deg,#ff69b4,#ff1493);color:#fff;font-weight:700;box-shadow:2px 2px 0 #c2006a;}
+.nag-foot button:hover{background:linear-gradient(180deg,#ff1493,#c2006a);}
+
+/* Desi toast notification */
+.desi-toast{position:fixed;top:74px;right:18px;background:#fff;border:1px solid #c8d8c8;border-left:4px solid #006633;box-shadow:0 3px 12px rgba(0,0,0,.15);padding:10px 14px;font-size:13px;color:#333;z-index:70;max-width:300px;display:none;}
+.desi-toast.show{display:block;animation:slideIn .2s ease-out;}
+@keyframes slideIn{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
+.dt-label{font-size:10px;font-weight:700;color:#006633;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;}
+
+/* Free MBs — styled as NADRA service announcement */
+.free-mb{position:fixed;bottom:52px;right:22px;background:#fff;border:1px solid #c8d8c8;box-shadow:0 4px 18px rgba(0,0,0,.18);z-index:65;max-width:240px;overflow:hidden;display:none;}
+.fm-hdr{background:linear-gradient(180deg,#006633,#004d26);color:#fff;padding:8px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+.fm-hdr button{background:none;border:none;color:#cceedd;font-size:15px;cursor:pointer;padding:0;line-height:1;}
+.fm-body{padding:10px 12px;font-size:13px;color:#333;line-height:1.5;cursor:pointer;}
+.fm-body b{color:#006633;}
+.fm-body .fm-sub{font-size:11px;color:#888;margin-top:4px;}
+
+/* BSOD */
+.bsod{position:fixed;inset:0;background:#0000aa;color:#fff;font-family:'Courier New',monospace;padding:60px 8%;z-index:200;display:none;font-size:18px;line-height:1.6;}
+.bsod.show{display:block;}
+.bsod h1{background:#fff;color:#0000aa;display:inline-block;padding:0 8px;font-size:22px;margin-bottom:20px;font-weight:normal;}
+.bsod .code{margin-top:30px;color:#ddd;font-size:14px;}
+
+/* Bottom ticker */
+.ticker{position:fixed;bottom:0;left:0;right:0;background:#004d20;color:#cceedd;padding:5px 0;overflow:hidden;white-space:nowrap;border-top:2px solid #006633;z-index:40;font-size:12px;display:none;}
+.ticker.show{display:block;}
+.ticker span{display:inline-block;padding-left:100%;animation:scrollTicker 32s linear infinite;}
+@keyframes scrollTicker{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+
+/* FOOTER */
+#nadra-footer{background:#004d20;color:#88bb99;font-size:11px;text-align:center;padding:14px;border-top:3px solid #006633;position:relative;z-index:200;}
+#nadra-footer a{color:#aaddbb;text-decoration:none;}
+#nadra-footer .fl{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+
+@keyframes liveBlink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ═══════════ PROGRESSIVE CHAOS ═══════════
+   Screen 1 = clean NADRA
+   Screen 2 = slightly off
+   Screen 3 = full chaos
+   Screen 4 = rainbow explosion
+   Screen 5 = cursed final
+════════════════════════════════════════════ */
+
+/* SCREEN 2 — slight degradation */
+#screen-otp .nadra-panel{
+  border-width:2px;
+  border-color:#b8860b;
+  transform:rotate(-0.4deg);
+}
+#screen-otp .panel-title{
+  background:linear-gradient(90deg,#006633,#cc9900,#006633);
+  letter-spacing:1px;
+  font-size:15px;
+}
+#screen-otp .otp-inputs input{
+  border-radius:0;
+}
+#screen-otp .otp-inputs input:nth-child(3){transform:translateY(4px);}
+#screen-otp .otp-inputs input:nth-child(5){transform:translateY(-4px) rotate(1deg);}
+#screen-otp .btn-green{letter-spacing:3px;transform:skew(-2deg);}
+
+/* SCREEN 3 — full chaos (but NADRA colours) */
+#screen-cursed{font-family:Arial,sans-serif;}
+#screen-cursed .cursed-panel{
+  border:3px solid #cc0000;
+  transform:rotate(0.3deg);
+  box-shadow:4px 4px 0 #b8860b, 8px 8px 0 #006633;
+}
+#screen-cursed .panel-title{
+  background:linear-gradient(90deg,#cc0000,#006633,#cc9900,#cc0000);
+  background-size:300% 100%;
+  animation:titleShift 3s infinite linear;
+  font-size:16px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+@keyframes titleShift{0%{background-position:0%}100%{background-position:300%}}
+#screen-cursed .c-field label{color:#cc0000;font-size:14px;}
+#screen-cursed .c-field input{
+  border:2px dashed #cc0000;
+  background:#fffef0;
+  font-size:15px;
+}
+#screen-cursed .captcha-wrap{
+  border:3px solid #006633;
+  background:#fffff0;
+  transform:rotate(-0.5deg);
+}
+#screen-cursed .captcha-hdr-title{
+  font-size:14px;
+  color:#cc0000;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+#screen-cursed .btn-c-main{
+  letter-spacing:4px;
+  font-size:15px;
+  animation:btnPulse 1.5s infinite;
+  transform:skew(-3deg);
+}
+@keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,102,51,.4)}50%{box-shadow:0 0 0 8px rgba(0,102,51,0)}}
+#screen-cursed .meters .meter{
+  border:2px solid #cc0000;
+  background:#fff9f9;
+}
+/* Shaking rage meter label when patience drops */
+#screen-cursed .meter .lbl{font-size:12px;font-weight:900;color:#cc0000;}
+
+/* SCREEN 4 — rainbow celebration chaos */
+#screen-success .success-panel{
+  border:4px solid transparent;
+  border-image:linear-gradient(45deg,#006633,#ffcc00,#cc0000,#006633) 1;
+  animation:borderSpin 2s infinite linear;
+  transform:scale(1.02);
+}
+#screen-success .panel-title{
+  background:linear-gradient(90deg,#006633,#ffcc00,#cc0000,#006633);
+  background-size:300% 100%;
+  animation:titleShift 1.5s infinite linear;
+  font-size:18px;
+  letter-spacing:4px;
+  text-transform:uppercase;
+}
+#screen-success .success-icon{
+  animation:spin360 2s linear infinite;
+  font-size:24px;
+  background:linear-gradient(135deg,#006633,#ffcc00);
+}
+@keyframes spin360{to{transform:rotate(360deg)}}
+#screen-success .success-title{
+  font-size:28px;
+  animation:colorFlash 0.8s infinite;
+}
+@keyframes colorFlash{0%{color:#006633}33%{color:#cc0000}66%{color:#b8860b}100%{color:#006633}}
+#screen-success .success-msg{font-size:15px;line-height:1.9;}
+#screen-success .fake-progress{border:2px solid #006633;}
+
+/* SCREEN 5 — cursed final */
+#screen-dashboard .final-panel{
+  border:3px solid #cc0000;
+  box-shadow:0 0 0 6px #ffcc00, 0 0 0 10px #cc0000;
+  transform:rotate(-0.6deg);
+}
+#screen-dashboard .panel-title{
+  background:linear-gradient(90deg,#004d20,#cc0000,#004d20);
+  background-size:200% 100%;
+  animation:titleShift 4s infinite linear;
+  letter-spacing:3px;
+  font-size:12px;
+  text-transform:uppercase;
+}
+#screen-dashboard .final-title{
+  font-size:26px;
+  font-weight:900;
+  color:#cc0000;
+  letter-spacing:2px;
+  animation:colorFlash 1.2s infinite;
+}
+#screen-dashboard .final-msg{font-size:13px;line-height:2;}
+#screen-dashboard code{background:#ffcc00;padding:1px 6px;color:#000;font-weight:700;}
+#screen-dashboard .final-buttons button{
+  letter-spacing:1px;
+  transform:skew(-2deg);
+}
+#screen-dashboard .final-buttons .b4{animation:btnPulse 1s infinite;}
+
+/* Announcement bar on screen 3+ gets a warning style */
+body.screen3up .announce-bar{
+  background:#fff0c0;border-bottom-color:#cc9900;color:#664400;
+}
+</style>
+</head>
+<body>
+
+<!-- AUDIO ELEMENTS -->
+<audio id="snd-sparrow"  src="assets/sparrow_s_ouch.mp3" preload="auto"></audio>
+<audio id="snd-chicken"  src="assets/chicken_roar.mp3"   preload="auto"></audio>
+<audio id="snd-memes"    src="assets/memes.mp3"          preload="auto"></audio>
+
+<!-- TOP BAR -->
+<div id="nadra-topbar">
+  <div class="tl">
+    <span>Government of Pakistan</span>
+    <a href="#" onclick="randToast();return false">Urdu</a>
+    <a href="#" onclick="randToast();return false">Accessibility</a>
+  </div>
+  <div>
+    <a href="#" onclick="randToast();return false">Sitemap</a>
+    &nbsp;|&nbsp;
+    <a href="#" onclick="randToast();return false">Contact Us</a>
+    &nbsp;|&nbsp;
+    <span>Portal Version 3.5.1.4</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div id="nadra-header">
+  <div class="header-inner">
+    <div class="nadra-shield">
+      <img src="assets/logo.png" alt="NADRA Logo" style="width:88px;height:88px;object-fit:contain;display:block;background:transparent;border:none;"/>
+    </div>
+    <div class="header-brand">
+      <div class="gov-line">Government of Pakistan</div>
+      <h1>National Database &amp; Registration Authority</h1>
+      <div class="tagline">Empowering Citizens Through Secure Identity Management</div>
+    </div>
+    <div class="header-right">
+      <div>[SSL SECURED]</div>
+      <div>Citizen Portal</div>
+      <div class="ver" id="hdate">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<div id="nadra-nav">
+  <div class="nav-inner">
+    <a href="#" class="active" onclick="return false">Home</a>
+    <a href="#" onclick="randToast();return false">Guidelines</a>
+    <a href="#" onclick="randToast();return false">Downloads</a>
+    <a href="#" onclick="randToast();return false">FAQ</a>
+    <a href="#" onclick="triggerBSOD();return false">CNIC Services</a>
+    <a href="#" onclick="randToast();return false">Book Appointment</a>
+    <a href="#" onclick="randToast();return false">Contact Us</a>
+    <span class="nav-right">Helpline: <b>1777</b></span>
+  </div>
+</div>
+
+<!-- ANNOUNCEMENT -->
+<div class="announce-bar">
+  <span class="a-tag">NOTICE</span>
+  <span>Citizens are advised to carry original CNIC during visits. Portal will observe <b>Load Shedding Schedule</b> daily from 2:00 PM to 4:00 PM. All services unavailable during this window.</span>
+</div>
+
+<!-- BREADCRUMB -->
+<div id="breadcrumb">
+  Home &rsaquo; <span>Citizen Login Portal</span>
+</div>
+
+<!-- PAGE WRAPPER -->
+<div id="page-wrapper">
+
+<!-- ======= SCREEN 1: LOGIN ======= -->
+<div id="screen-login" class="screen active">
+  <div class="two-col" style="max-width:860px;margin:0 auto;">
+
+    <div class="main-col">
+      <div class="nadra-panel">
+        <div class="panel-title">[SECURE] Citizen Authentication — Secure Login</div>
+        <div class="panel-body">
+
+          <div class="notice-box">
+            <b>Zaroori Itlaa — Important Notice</b>
+            Apna CNIC number aur password daalen. Har login attempt record hota hai, sarkari databases mein save hota hai, aur Geo News ko bhi bheja jata hai.
+          </div>
+
+          <div class="n-field">
+            <label>CNIC / User ID <span class="req">*</span>
+              <span class="hint">13 digit CNIC likhen — bina dashes ke. Agar yaad nahi toh NADRA se card dobara banwayen (3 hafton ka wait hai)</span>
+            </label>
+            <input id="email" type="text" placeholder="e.g. 3520112345671" autocomplete="username" maxlength="40"/>
+            <div class="field-hint">Format: XXXXXYYYYYZZZZ (13 angan — spaces mat dalen, system confuse ho jata hai)</div>
+          </div>
+
+          <div class="n-field">
+            <label>Password <span class="req">*</span>
+              <span class="hint">Password daalen — agar bhool gaye hain toh neeche "Forgot Password" dabayein (aur rona shuru karein)</span>
+            </label>
+            <input id="password" type="password" placeholder="Apna raaz yahan likhen" autocomplete="current-password"/>
+          </div>
+
+          <div class="n-field security">
+            <label>Security Verification (Biometric) <span class="req">*</span>
+              <span class="hint">Aap ki aakhri biryani mein kitne aloo the? Galat jawab pe account permanently band ho jata hai</span>
+            </label>
+            <input id="biryani" type="number" placeholder="Aloo ki tadaad likhein (1-20)" value="2" min="1" max="20"/>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-size:12px;">
+            <label style="display:flex;align-items:center;gap:6px;color:#555;cursor:pointer;">
+              <input type="checkbox" style="accent-color:#006633;" checked>
+              Remember this device for 24 hours
+            </label>
+            <a href="#" onclick="randToast();return false" style="color:#006633;font-size:12px;">Forgot Password?</a>
+          </div>
+
+          <div class="desi-buttons">
+            <button class="db-real"     onclick="playSound('snd-sparrow');randToast()">LOGIN</button>
+            <button class="db-ghost"    onclick="playSound('snd-chicken');randToast()">LOGIN ???</button>
+            <button class="db-real"     onclick="goToOTP()">LOGIN</button>
+            <button class="db-ghost"    onclick="playSound('snd-sparrow');randToast()">maybe continue</button>
+            <button class="db-real"     onclick="goToOTP()">NOT LOGIN</button>
+            <button class="db-invisible" onclick="playSound('snd-memes');randToast()">.</button>
+          </div>
+
+          <div style="text-align:center;margin-top:12px;">
+            <a href="#" onclick="randToast();return false" style="color:#006633;font-size:12px;text-decoration:underline;">New User? Register Here</a>
+          </div>
+
+          <div class="sec-badges">
+            <div class="sec-badge">256-bit SSL Encryption</div>
+            <div class="sec-badge">NADRA Verified</div>
+            <div class="sec-badge">Government of Pakistan</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-sidebar">
+      <div class="is-block">
+        <h4>Login Se Pehle</h4>
+        <ul>
+          <li>CNIC expire nahi hona chahiye</li>
+          <li>Modern browser use karein (IE6 band karo)</li>
+          <li>Popup blockers hatayein</li>
+          <li>Biryani mein aloo count ready rakhein</li>
+          <li>Wazu karna optional hai lekin recommended</li>
+        </ul>
+      </div>
+      <div class="is-block">
+        <h4>Helpline</h4>
+        <div class="cl"><b>1777</b> (Toll Free — shayad uthayein)</div>
+        <div class="cl"><b>+92 51 111 786 100</b></div>
+        <div style="margin-top:6px;font-size:11px;color:#888;">Mon-Sat: 9AM-5PM<br>Hold time: 3 ghante minimum<br>Hold music: Geo News theme on loop</div>
+      </div>
+      <div class="is-block">
+        <h4>Daftar ke Auraaqaat</h4>
+        <p>Pir se Juma: 8:00 AM - 4:00 PM<br>Hafta: 9:00 AM - 1:00 PM<br><span style="color:#cc0000;font-size:11px;">Load shedding ke waqt band. Daily 2-4 PM.</span></p>
+      </div>
+      <div class="is-block" style="background:#fff3cd;border-color:#b8860b;">
+        <h4 style="color:#7a5800;border-color:#b8860b;">Load Shedding Alert</h4>
+        <p style="color:#664400;">Portal roz 2 se 4 baje band rehta hai. Sirf subh 4:00 se 4:01 baje tak available hai jab bijli hoti hai.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======= SCREEN 2: OTP ======= -->
+<div id="screen-otp" class="screen">
+  <div class="two-col" style="max-width:860px;margin:0 auto;">
+
+    <div class="main-col">
+      <div class="nadra-panel">
+        <div class="panel-title">Two-Factor Verification — OTP Authentication</div>
+        <div class="panel-body">
+
+          <div class="otp-notice">
+            Aap ka OTP bhej diya gaya hai. Shayad.<br>
+            OTP: <span class="otp-code" id="otp-inline">482739</span><br>
+            <span style="font-size:11px;color:#555;">NADRA Transparency Policy 3.1.2 ke tehat yahan dikha rahe hain. Kisi ko mat batayen siwaay NADRA staff ke (jo bhi yeh padhay).</span>
+          </div>
+
+          <div class="n-field">
+            <label>OTP Delivery Method Chunein
+              <span class="hint">Woh tareeqa chunen jis se aap OTP NAHI paana chahte</span>
+            </label>
+            <select id="delivery">
+              <option>SMS — shayad aaye, shayad na aaye, Allah malik hai</option>
+              <option>WhatsApp — deliver hua, read kabhi nahi hoga</option>
+              <option>Kabootar — 4-7 kaam ke din, traffic se bachna padega</option>
+              <option>Rickshaw wala announcement — 50 rupay alag, bargaining nahi</option>
+              <option>Dhol wala notification — neighbors bhi sun lenge</option>
+              <option>Pados wali Aunty ka call — pehle gossip, OTP baad mein</option>
+              <option>Geo News breaking ticker — BREAKING: Aap ka OTP...</option>
+            </select>
+          </div>
+
+          <p style="font-size:13px;color:#555;margin-bottom:8px;">Apne registered mobile number pe aaye 6-digit OTP daalen:</p>
+          <div class="notice-box red" style="font-size:11px;padding:6px 10px;margin-bottom:10px;">
+            Noti: Box 4 Security Policy ke tehat ulta hai. Aakhri 6 boxes NADRA Quality Assurance Decoys hain — Security Policy 4.2.1. Inhein bharna zaroori hai (koi fayda nahi).
+          </div>
+
+          <div class="otp-inputs">
+            <input maxlength="1" data-i="0"/>
+            <input maxlength="1" data-i="1"/>
+            <input maxlength="1" data-i="2"/>
+            <input maxlength="1" data-i="3" class="upside" title="Upside-down per security policy"/>
+            <input maxlength="1" data-i="4"/>
+            <input maxlength="1" data-i="5"/>
+            <input maxlength="1" data-i="-1" class="tiny" placeholder="?"/>
+            <input maxlength="1" data-i="-1" class="tiny" placeholder="?"/>
+            <input maxlength="1" data-i="-1" class="tiny" placeholder="?"/>
+            <input maxlength="1" data-i="-1" class="tiny" placeholder="?"/>
+            <input maxlength="1" data-i="-1" class="tiny" placeholder="?"/>
+            <input maxlength="1" data-i="-1" class="tiny" placeholder="?"/>
+          </div>
+
+          <div class="otp-fine">Boxes 1-6 = asli OTP &nbsp;|&nbsp; Boxes 7-12 = NADRA QA Decoys(TM) — bharne zaroori hain</div>
+
+          <button class="btn-green" style="margin-top:16px;" onclick="verifyOTP()">Verify Karein aur Aage Barhen</button>
+          <div class="otp-resend">OTP nahi aaya? <a onclick="rerollOTP()">Dobara Bhejein</a> &nbsp;|&nbsp; <a onclick="randToast()">Session 4 second mein khatam</a></div>
+
+          <div style="margin-top:14px;background:#f0f7f0;border:1px solid #a5d6a7;padding:10px 12px;font-size:11px;color:#2e7d32;">
+            This session is protected by NADRA Multi-Factor Authentication Protocol v2.1.4. Session ID: <span style="font-family:monospace;" id="ip-otp">127.0.0.1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-sidebar">
+      <div class="is-block">
+        <h4>OTP Nahi Aaya?</h4>
+        <ul>
+          <li>Spam folder check karein</li>
+          <li>Kabootar ka intezaar karein</li>
+          <li>Aunty ki gossip khatam hone dein</li>
+          <li>Load shedding khatam hone ke baad try karein</li>
+          <li>Ro lo — koi fayda nahi lekin dil halka hoga</li>
+        </ul>
+      </div>
+      <div class="is-block">
+        <h4>Security Notice</h4>
+        <p>NADRA kabhi aap ka OTP nahi maangta. Siwaaye is screen ke. Aur agle ki. Aur popup mein bhi maangega. Woh alag baat hai.</p>
+      </div>
+      <div class="is-block" style="background:#fff3cd;border-color:#b8860b;">
+        <h4 style="color:#7a5800;border-color:#b8860b;">Session Timer</h4>
+        <p style="color:#664400;">Aap ka session 4 second mein expire hoga. Yeh timer bar bar reset hota rehta hai. Ghabrana nahi hai.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======= SCREEN 3: ADVANCED VERIFICATION (absurd but NADRA white) ======= -->
+<div id="screen-cursed" class="screen">
+  <div class="two-col" style="max-width:960px;margin:0 auto;">
+
+    <div class="main-col">
+      <div class="cursed-panel">
+        <div class="panel-title" style="background:linear-gradient(180deg,#006633,#004d26);">
+          Advanced Identity Verification — Step 3 of 47
+        </div>
+        <div style="padding:20px 24px;">
+
+          <div style="font-size:11px;color:#888;margin-bottom:12px;border-bottom:1px solid #eee;padding-bottom:8px;">
+            Session ID: <span id="ip-cursed" style="font-family:monospace;">127.0.0.1</span> &nbsp;|&nbsp; Portal Build: nadra_secure_v6.6.6 &nbsp;|&nbsp; Compliance: ISO 99999:2026
+          </div>
+
+          <div class="meters">
+            <div class="meter">
+              <div class="lbl"><span>CITIZEN PATIENCE LEVEL</span><span id="rage-pct">100%</span></div>
+              <div class="bar"><div class="fill" id="rage-fill" style="width:100%;"></div></div>
+            </div>
+            <div class="meter dmg">
+              <div class="lbl"><span>TRUST IN NADRA</span><span id="dmg-pct">100%</span></div>
+              <div class="bar"><div class="fill" id="dmg-fill" style="width:100%;"></div></div>
+            </div>
+          </div>
+
+          <div style="position:relative;">
+            <div class="eye" id="eye"><div class="pupil" id="pupil"></div></div>
+
+            <div class="c-field">
+              <label>Email Address <span style="color:#cc0000;">*</span>
+                <span class="micro">Zaroori: Email mein haroof "e" NAHI hona chahiye — NADRA Linguistic Policy 7.4(b). Yeh qanoon hai. Todna jayez nahi.</span>
+              </label>
+              <input id="c-email" placeholder="(koi bhi email jisme 'e' na ho — mushkil hai haan)"/>
+              <div class="error-msg" id="email-error">Khataa: "e" haroof mila! Aap ki session flag ho gayi. NADRA office jayen, asli CNIC layen, 3 ghante line mein lagein.</div>
+            </div>
+
+            <div class="c-field">
+              <label>Naya Secure Password Banayein <span style="color:#cc0000;">*</span>
+                <span class="micro">Zaroori: pasandida sabzi ulti likhi hoi + 2 emojis + blood group + dushman ka poora naam + 1 Roman numeral. Tamam numbers ka total exactly 27 ho. Vowels nahi. Umeed nahi. Apna naam nahi.</span>
+              </label>
+              <div class="overlap-wrap">
+                <input id="c-pass" placeholder="e.g. !ottacorb A+ muhammadali VII"/>
+                <input placeholder="Password confirm karein (alag hona chahiye — haan seriously)"/>
+              </div>
+            </div>
+
+            <!-- WEBCAM FEED -->
+            <div id="webcam-box" style="display:none;margin-bottom:14px;border:2px solid #cc0000;background:#000;position:relative;max-width:320px;">
+              <div style="background:#cc0000;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;display:flex;align-items:center;justify-content:space-between;letter-spacing:.5px;">
+                <span>NADRA LIVE CITIZEN FEED — BIOMETRIC SCAN ACTIVE</span>
+                <span id="webcam-live" style="background:#fff;color:#cc0000;padding:1px 6px;font-size:9px;border-radius:2px;animation:liveBlink 1s infinite;">LIVE</span>
+              </div>
+              <video id="webcam-video" autoplay playsinline muted style="width:100%;display:block;max-height:180px;object-fit:cover;"></video>
+              <div style="background:rgba(0,0,0,.7);color:#0f0;font-size:9px;font-family:monospace;padding:4px 8px;letter-spacing:.5px;" id="webcam-status">Scanning... facial recognition in progress...</div>
+            </div>
+            <div id="webcam-denied" style="display:none;margin-bottom:14px;background:#fff0f0;border:2px solid #cc0000;padding:10px 12px;font-size:12px;color:#660000;">
+              Camera access denied. NADRA requires biometric verification per Section 18-C. Your application has been flagged. Please visit the nearest NADRA office with original CNIC.
+            </div>
+
+            <!-- IMAGE CAPTCHA -->
+            <div class="captcha-wrap">
+              <div class="captcha-hdr">
+                <span class="captcha-hdr-title">NADRA Citizen Identity CAPTCHA — Mandatory Completion</span>
+                <span class="captcha-diff">DIFFICULTY: SHAITANI</span>
+              </div>
+              <div class="captcha-prompt">
+                Tamam tasweerain chunein jisme <strong>Army Chief, Field Marshal Asim Munir Sahab</strong> dikhte hon.<br>
+                <span style="font-size:11px;color:#888;">COAS ko pehchanna Section 14-B ke tehat farz hai. Galat selection pe aap ka password ka ek haroof chup chaap delete ho jayega. Koi batayega nahi.</span>
+              </div>
+              <div class="captcha-grid" id="grid">
+                <div class="captcha-tile" onclick="captchaClick(this,false)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Maryam_Nawaz_Sharif.jpg/250px-Maryam_Nawaz_Sharif.jpg" alt="Person A"/>
+                  <span class="lbl">Maryam Nawaz</span>
+                </div>
+                <div class="captcha-tile" onclick="captchaClick(this,true)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Field_Marshal_Asim_Munir.jpg/250px-Field_Marshal_Asim_Munir.jpg" alt="Person B"/>
+                  <span class="lbl">Select if COAS</span>
+                </div>
+                <div class="captcha-tile" onclick="captchaClick(this,false)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Official_Presidential_Portrait_of_President_Donald_J._Trump_%282025%29_%28cropped%29%282%29.jpg/250px-Official_Presidential_Portrait_of_President_Donald_J._Trump_%282025%29_%28cropped%29%282%29.jpg" alt="Person C"/>
+                  <span class="lbl">Donald Trump</span>
+                </div>
+                <div class="captcha-tile" onclick="captchaClick(this,false)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Elon_Musk_-_54820081119_%28cropped%29.jpg/250px-Elon_Musk_-_54820081119_%28cropped%29.jpg" alt="Person D"/>
+                  <span class="lbl">Elon Musk</span>
+                </div>
+                <div class="captcha-tile dodge" id="dodger" onclick="captchaClick(this,true)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Field_Marshal_Asim_Munir.jpg/250px-Field_Marshal_Asim_Munir.jpg" alt="Person B"/>
+                  <span class="lbl">Select if COAS</span>
+                </div>
+                <div class="captcha-tile" onclick="captchaClick(this,false)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Katrina_Kaif_at_the_Bharat_audio_launch.jpg/250px-Katrina_Kaif_at_the_Bharat_audio_launch.jpg" alt="Person E"/>
+                  <span class="lbl">Katrina Kaif</span>
+                </div>
+                <div class="captcha-tile" onclick="captchaClick(this,false)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Maryam_Nawaz_Sharif.jpg/250px-Maryam_Nawaz_Sharif.jpg" alt="Person A"/>
+                  <span class="lbl">Not COAS</span>
+                </div>
+                <div class="captcha-tile" onclick="captchaClick(this,true)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Field_Marshal_Asim_Munir.jpg/250px-Field_Marshal_Asim_Munir.jpg" alt="Person B"/>
+                  <span class="lbl">Select if COAS</span>
+                </div>
+                <div class="captcha-tile" onclick="captchaClick(this,false)">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Elon_Musk_-_54820081119_%28cropped%29.jpg/250px-Elon_Musk_-_54820081119_%28cropped%29.jpg" alt="Person D"/>
+                  <span class="lbl">Not COAS</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="c-row">
+              <label>
+                <input type="checkbox" id="agree" style="accent-color:#006633;"/>
+                Main maan leta/leti hoon ke yahan jo bhi daala woh kahin nahi jayega
+              </label>
+              <span class="micro-link" onclick="alert('Terms of Service:\n\n1. NADRA aap ka tamam data hamesha ke liye rakh leta hai.\n2. Koi wapsi nahi. Koi appeal nahi. Koi reham nahi.\n3. Continue karne se aap khushi ka haq bhi chhod dete hain.\n4. Dhara 47(b) sub-clause (iii) dekhein (jo available nahi hai).')">Puri Sharten Parhen</span>
+            </div>
+
+            <div class="c-actions">
+              <button class="btn-c-main" onclick="fakeLogin()">Verification Submit Karein</button>
+              <button class="btn-c-ghost" onclick="realLogin()">password bhool gaya?</button>
+              <button class="submit-runaway" id="runaway" onmouseover="runAway(event)" onclick="randToast()">Submit</button>
+            </div>
+
+            <div class="progress-down"></div>
+            <div class="progress-lbl">Verification progress: ulti taraf ja rahi hai... load shedding 3 second mein</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-sidebar">
+      <div class="is-block">
+        <h4>Password Ki Shartein</h4>
+        <ul>
+          <li>Kam az kam 8 hurf</li>
+          <li>Ek Roman numeral zaroori</li>
+          <li>Tamam numbers ka total = 27</li>
+          <li>Koi vowel nahi</li>
+          <li>Blood group shamil ho</li>
+          <li>Dushman ka nickname shamil ho</li>
+          <li>Umeed nahi honi chahiye</li>
+          <li>Apna naam bilkul nahi</li>
+        </ul>
+      </div>
+      <div class="is-block" style="background:#fff0f0;border-color:#cc0000;">
+        <h4 style="color:#cc0000;border-color:#cc0000;">KHATARNAAK Alert</h4>
+        <p style="color:#660000;">Aap ki session 4 second mein khatam hogi. Yeh message bar bar reset hota hai. Ghabrana nahi hai.</p>
+      </div>
+      <div class="is-block">
+        <h4>CAPTCHA Mein Mushkil?</h4>
+        <p>Agar COAS ko nahi pehchanty, toh NADRA office jayen. Asli CNIC layen. 2 passport photos layen. Ek affidavit bhi layen. 3 ghante lainen mein lagein.</p>
+      </div>
+      <div class="is-block">
+        <h4>Technical Support</h4>
+        <p>1777 pe call karein.<br>Hold music: Geo News theme on loop.<br>Expected resolution: kabhi nahi.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======= SCREEN 4: LOGIN SUCCESSFUL ======= -->
+<div id="screen-success" class="screen" style="max-width:580px;margin:0 auto;">
+  <div class="success-panel">
+    <div class="panel-title" style="justify-content:center;">NADRA Citizen Portal — Authentication Result</div>
+    <div class="panel-body" style="text-align:center;padding:36px 28px;">
+      <div class="success-icon">OK</div>
+      <div class="success-title">Login Kamiyaab!</div>
+      <div class="success-msg">
+        Marhaba, Citizen. Aap ki pehchaan 47 sarkari systems ne ek saath verify kar li hai.<br><br>
+        Please intezaar karein jab tak hum aap ki citizen profile load karte hain. Yeh window band mat karein. Sans mat lein. Screen se nazar mat milayen.
+      </div>
+      <div class="success-sub">Citizen data load ho raha hai... 3 second se le kar 9 saal tak lag sakte hain. Shukriya sabr ka.</div>
+      <div class="fake-progress"><div class="fake-progress-bar"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= SCREEN 5: PROGRAM WARR GAYA ======= -->
+<div id="screen-dashboard" class="screen" style="max-width:580px;margin:0 auto;">
+  <div class="final-panel">
+    <div class="panel-title" style="justify-content:center;">NADRA Citizen Portal — Session Status Report</div>
+    <div class="final-body">
+      <div class="final-title">Program Warr Gaya.</div>
+      <div class="final-msg">
+        Security reasons ki wajah se,<br>
+        <b>khushi filhaal available nahi hai.</b><br><br>
+        Aap ki session band ho gayi. Tamam data <code>/dev/null</code> mein save ho gaya. Password kisi bure wale se badal diya gaya. Aloo count NADRA HQ ko bhej diya gaya. Ammi ko bhi inform kar diya gaya.<br><br>
+        Session ki umr: <span id="timer">0</span> second.
+      </div>
+      <div class="final-buttons">
+        <button class="b1" onclick="goBackToCursed()">Phir Se Try Karo</button>
+        <button class="b2" onclick="randToast()">Shikayat Darj Karein</button>
+        <button class="b3" onclick="randToast()">Ammi Ko Batayein</button>
+        <button class="b4" onclick="triggerBSOD()">Haar Maan Lo</button>
+      </div>
+      <div class="final-stats">
+        Session ID: <span id="ip-cursed-final" style="font-family:monospace;">127.0.0.1</span> &nbsp;|&nbsp; Status: TERMINATED &nbsp;|&nbsp; Citizen Hope Level: 0%<br>
+        <span style="margin-top:6px;display:inline-block;font-style:italic;color:#bbb;">(Just kidding. You survived. Welcome.)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<!-- FOOTER -->
+<div id="nadra-footer">
+  <div class="fl">
+    <a href="#" onclick="randToast();return false">Downloads</a>
+    <a href="#" onclick="randToast();return false">Ordinances</a>
+    <a href="#" onclick="randToast();return false">Locations</a>
+    <a href="#" onclick="randToast();return false">Careers</a>
+    <a href="#" onclick="randToast();return false">Complaints</a>
+    <a href="#" onclick="randToast();return false">Privacy Policy</a>
+  </div>
+  <div>COPYRIGHT 2015 - 2026 NATIONAL DATABASE &amp; REGISTRATION AUTHORITY &nbsp;|&nbsp; csd@nadra.gov.pk &nbsp;|&nbsp; 1777</div>
+</div>
+
+<!-- ======= OVERLAYS ======= -->
+
+<!-- Password Reset Modal -->
+<div class="modal-overlay" id="toast">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>NADRA System Notification — Password Reset Complete</h2>
+      <button class="mh-close" onclick="goToCursed()">x</button>
+    </div>
+    <div class="modal-body">
+      <p>Aap ne OTP sahi daala, isliye NADRA ne — khud se — aap ka password reset kar diya. JazakAllah bahut zyada. Shukriya. Wah wah.</p>
+      <p>Aap ka naya system-generated password yeh hai:</p>
+      <div class="pw-pill" id="new-pw">s4dB0i_2024!</div>
+      <p style="margin-top:12px;">OK dabane se pehle yaad kar lein. Aap ke registered address pe email bhi bheja gaya hai (jhoot hai).</p>
+      <div class="modal-fine">Koi email nahi bheja. Bas aise keh diya. Screenshot le lo jaldi se. Aap ka OTP expire ho gaya. Purana password hamesha ke liye delete ho gaya — aap ki yaaddasht sے bhi.</div>
+      <div class="modal-actions">
+        <button class="ma-p" onclick="goToCursed()">Theek Hai Bhai</button>
+        <button class="ma-s" onclick="goToCursed()">Maine Nahi Padha</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Desi Toast Notification -->
+<div class="desi-toast" id="desi-toast">
+  <div class="dt-label">NADRA — System Alert</div>
+  <div id="desi-toast-msg"></div>
+</div>
+
+<!-- Free MBs Announcement -->
+<div class="free-mb" id="freemb">
+  <div class="fm-hdr">
+    NADRA Special Service Announcement
+    <button onclick="closeFreeMB(event)">x</button>
+  </div>
+  <div class="fm-body" onclick="randToast()">
+    <b>FREE 50 GB MBs!!</b>
+    <div class="fm-sub">YAHAN CLICK KAREIN — LIMITED OFFER<br>Jab tak dil toota hua hai tab tak valid</div>
+  </div>
+</div>
+
+<!-- Nag Popup -->
+<div class="nag" id="nag">
+  <div class="nag-hdr">NADRA — Citizen Wellness Check (Lazmi) &lt;3</div>
+  <div class="nag-body">
+    Hamara super intelligent AI system ne detect kiya hai ke aap ka dil toot raha hai.<br><br>
+    Kya aap theek hain bestie??? Ghabrana bilkul bhi nahi hai okay?? Hum aap se pyaar karte hain (NADRA ki taraf se).<br><br>
+    <span style="font-size:11px;color:#e75480;">* Yeh message aap ki emotional state monitor karne ke baad bheja gaya hai. Aap ki facial expressions NADRA database mein save ho gayi hain.</span>
+  </div>
+  <div class="nag-foot">
+    <button onclick="closeNag()">Nahi Yaar :(</button>
+    <button onclick="closeNag()">Bilkul Bhi Theek Nahi</button>
+  </div>
+</div>
+
+<!-- BSOD -->
+<div class="bsod" id="bsod">
+  <h1>:(</h1>
+  <p>Your PC ran into a problem and needs to restart. We are collecting some error information, and then we will never recover from this.</p>
+  <p style="margin-top:20px;">For more information about this issue and possible fixes, please visit your local chai dhaba and reflect on your choices.</p>
+  <p style="margin-top:16px;">If you call a support person, give them this info:</p>
+  <p class="code">Stop code: HAPPINESS_NOT_FOUND<br>What failed: your_life.dll<br>Aap se: na ho payega<br>Recommended action: chai</p>
+  <p style="margin-top:30px;">Press any key to continue suffering...</p>
+</div>
+
+<!-- Bottom Ticker -->
+<div class="ticker" id="ticker">
+  <span>KHABARDAR: Aap ka webcam on hai &nbsp;|&nbsp; Password 47 logon ko mil gaya &nbsp;|&nbsp; Ammi disappointed hain &nbsp;|&nbsp; Load shedding 3 second mein &nbsp;|&nbsp; Session 4 second mein khatam &nbsp;|&nbsp; Shikayat ignore ho gayi kamiyabi se &nbsp;|&nbsp; Aloo count national database mein darj &nbsp;|&nbsp; Screen se nazar mat milao &nbsp;|&nbsp; Aap se na ho payega &nbsp;|&nbsp; Ghabrana nahi hai &nbsp;|&nbsp; NADRA use karne ka shukriya &nbsp;|&nbsp; Peechay toh dekho peechay &nbsp;|&nbsp;</span>
+</div>
+
+<script>
+/* ============ RANDOM OUT-OF-CONTEXT TOASTS ============ */
+const _msgs = [
+  'Murghi pehle aayi ya anda?',
+  'Karachi mein aaj bijli nahi hai.',
+  'Bhai chai peeni hai?',
+  'Ammi ne biryani banayi hai — ghar aa jao.',
+  'WiFi ka password bhool gaya phir se.',
+  'Petrol ke daam phir barh gaye. Allah Hafiz.',
+  'Beta doctor ban jaao — Ammi',
+  'PSL ka schedule kab aayega bhai?',
+  'Netflix wali ID kisne badli???',
+  'Rickshaw wale ne kiraya double kar diya.',
+  'PTCL ka connection phir gaya.',
+  'Abbu ne pucha kaisa raha exam. Maine kaha theek.',
+  'Bhabhi ne samosa bheja hai tumhare liye.',
+  'Yeh sab worldly moh maya hai bhai.',
+  'GEO NEWS BREAKING: Kuch toh zaroor hua hai.',
+  'Tum mujhe yun bhula na paoge.',
+  '2 minute noodles mein 3 minute lagte hain. Ye sach hai.',
+  'Load shedding aaj 6 ghante ki hai.',
+  'Doodh wala subah 5 baje aata hai. Please so jao.',
+  'Bhai kal milte hain — InshaAllah. Pakka.',
+  'Rizq mein barkat ho. Ameen.',
+  'Pakistan cricket team phir haar gayi.',
+  'Imran Khan ne tweet kiya. Ya shayad nahi kiya.',
+  'Aaj mausam acha tha. Ghar se nikla nahi.',
+  'Number plate nahi lagi abhi tak.',
+  'Kya aap jaante hain ke samundar mein namak kyun hai?',
+  'Bijli ka bill 40,000 aa gaya. System ne kar diya.',
+  'Aap ki awaaz record ho rahi hai.',
+  'Yeh message galti se aaya. Please ignore karein.',
+  'Main theek hoon. Shukriya poochne ke liye.',
+];
+function randToast() { desiToast(_msgs[Math.floor(Math.random() * _msgs.length)]); }
+
+/* ============ AUDIO ============ */
+function playSound(id) {
+  try {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.currentTime = 0;
+    el.play().catch(() => {}); // silently ignore if file not found
+  } catch(e) {}
+}
+
+/* ============ SCREEN ROUTER ============ */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ============ UNLOCK TICKER + FREE MB FROM SCREEN 3 ============ */
+function enableChaos() {
+  document.getElementById('freemb').style.display = 'block';
+  document.getElementById('ticker').classList.add('show');
+  document.body.style.paddingBottom = '28px';
+}
+
+/* ============ IP TRACERS ============ */
+(function startIP() {
+  const ids = ['ip-otp','ip-cursed'];
+  const gen = () => [0,0,0,0].map(() => Math.floor(Math.random()*256)).join('.');
+  setInterval(() => {
+    const v = gen();
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = v; });
+  }, 1400);
+})();
+
+/* ============ DESI TOAST ============ */
+let _toastTimer;
+function desiToast(msg) {
+  const t = document.getElementById('desi-toast');
+  document.getElementById('desi-toast-msg').textContent = msg;
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  bumpMeters(8, 12);
+}
+
+/* ============ METERS (patience + trust — they go DOWN) ============ */
+let patience = 100, trust = 100;
+function bumpMeters(r, d) {
+  patience = Math.max(0, patience - r);
+  trust    = Math.max(0, trust    - d);
+  document.getElementById('rage-fill').style.width  = patience + '%';
+  document.getElementById('dmg-fill').style.width   = trust    + '%';
+  document.getElementById('rage-pct').textContent   = patience + '%';
+  document.getElementById('dmg-pct').textContent    = trust    + '%';
+}
+
+/* ============ FREE MBs ============ */
+function closeFreeMB(e) {
+  e.stopPropagation();
+  const b = document.getElementById('freemb');
+  b.style.display = 'none';
+  setTimeout(() => { b.style.display = 'block'; }, 8000);
+}
+
+/* ============ SCREEN 1 -> 2 ============ */
+function goToOTP() {
+  const email   = document.getElementById('email').value.trim();
+  const pass    = document.getElementById('password').value;
+  const biryani = document.getElementById('biryani').value;
+  if (!email || !pass) { randToast(); playSound('snd-sparrow'); return; }
+  if (!biryani || biryani < 1) { randToast(); return; }
+  rerollOTP();
+  show('screen-otp');
+  setTimeout(() => document.querySelector('.otp-inputs input').focus(), 200);
+}
+
+function rerollOTP() {
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  document.getElementById('otp-inline').textContent = code;
+  window._otp = code;
+  document.querySelectorAll('.otp-inputs input').forEach(i => i.value = '');
+}
+window._otp = '482739';
+
+/* OTP auto-advance with random jump */
+document.querySelectorAll('.otp-inputs input').forEach((inp, idx, arr) => {
+  inp.addEventListener('input', e => {
+    if (e.target.value && idx < arr.length - 1) {
+      const next = Math.random() < 0.3 ? Math.floor(Math.random() * arr.length) : idx + 1;
+      arr[next].focus();
+    }
+  });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !e.target.value && idx > 0) arr[idx-1].focus();
+  });
+});
+
+/* ============ SCREEN 2 -> MODAL ============ */
+function verifyOTP() {
+  const inputs  = Array.from(document.querySelectorAll('.otp-inputs input')).slice(0,6);
+  const entered = inputs.map(i => i.value).join('');
+  if (entered.length !== 6) { randToast(); return; }
+  if (entered !== window._otp) {
+    randToast();
+    playSound('snd-sparrow');
+    bumpMeters(15, 20);
+    return;
+  }
+  const passes = ['s4dB0i_2024!','cryHarder@2025','ifoundu_2much','paSSword4u!!','tH1s_is_fine','h0pe_is_d3ad?','biryani_l0ver!','chai_addict#1','m0nday_again?','0verCaffeinated!','rishta_rejected','whyMe@420'];
+  document.getElementById('new-pw').textContent = passes[Math.floor(Math.random() * passes.length)];
+  document.getElementById('toast').classList.add('active');
+  playSound('snd-chicken');
+}
+
+/* ============ MODAL -> SCREEN 3 ============ */
+function goToCursed() {
+  document.getElementById('toast').classList.remove('active');
+  enableChaos();
+  show('screen-cursed');
+  playSound('snd-memes');
+  startWebcam();
+  setTimeout(() => document.getElementById('nag').classList.add('show'), 4000);
+  startEye();
+  bumpMeters(20, 25);
+}
+
+function closeNag() {
+  document.getElementById('nag').classList.remove('show');
+  bumpMeters(5, 5);
+  setTimeout(() => document.getElementById('nag').classList.add('show'), 9000);
+}
+
+/* ============ EYE FOLLOWS CURSOR ============ */
+function startEye() {
+  const eye   = document.getElementById('eye');
+  const pupil = document.getElementById('pupil');
+  if (eye._wired) return;
+  eye._wired = true;
+  document.addEventListener('mousemove', e => {
+    if (!document.getElementById('screen-cursed').classList.contains('active')) return;
+    const rect = eye.getBoundingClientRect();
+    const dx = (e.clientX - (rect.left + rect.width/2))  / 30;
+    const dy = (e.clientY - (rect.top  + rect.height/2)) / 30;
+    const m  = 10;
+    pupil.style.transform = `translate(${Math.max(-m,Math.min(m,dx))}px,${Math.max(-m,Math.min(m,dy))}px)`;
+  });
+}
+
+/* ============ IMAGE CAPTCHA ============ */
+function captchaClick(tile, isCorrect) {
+  tile.classList.toggle('picked');
+  bumpMeters(3, 4);
+  if (!isCorrect && tile.classList.contains('picked')) {
+    const pass = document.getElementById('c-pass');
+    if (pass.value.length > 0) {
+      pass.value = pass.value.slice(0, -1);
+      randToast();
+    }
+  }
+  const picked = document.querySelectorAll('.captcha-tile.picked').length;
+  if (picked >= 3 && Math.random() < 0.5) {
+    setTimeout(() => {
+      document.querySelectorAll('.captcha-tile.picked').forEach(p => p.classList.remove('picked'));
+      randToast();
+    }, 400);
+  }
+}
+
+/* ============ WEBCAM ============ */
+function startWebcam() {
+  const box     = document.getElementById('webcam-box');
+  const denied  = document.getElementById('webcam-denied');
+  const video   = document.getElementById('webcam-video');
+  const status  = document.getElementById('webcam-status');
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    denied.style.display = 'block'; return;
+  }
+
+  navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    .then(stream => {
+      video.srcObject = stream;
+      box.style.display = 'block';
+
+      const msgs = [
+        'Scanning... facial recognition in progress...',
+        'Matching against 240M citizen records...',
+        'Biometric hash computed: a3f9...',
+        'Cross-referencing CNIC database...',
+        'Matching against wanted list... (relax probably)',
+        'Facial geometry: 94 points mapped',
+        'Eye distance ratio: 0.618 (suspicious)',
+        'Uploading to NADRA cloud... 34%',
+        'Comparing with Geo News footage...',
+        'Identity: UNVERIFIED — please select COAS',
+        'WARNING: Expression detected — frustration',
+        'Submitting to relevant authorities...',
+      ];
+      let mi = 0;
+      setInterval(() => {
+        mi = (mi + 1) % msgs.length;
+        status.textContent = msgs[mi];
+      }, 1800);
+    })
+    .catch(() => {
+      denied.style.display = 'block';
+    });
+}
+
+/* ============ CAPTCHA DODGER ============ */
+const dodger = document.getElementById('dodger');
+dodger.addEventListener('mouseenter', () => {
+  const dx = (Math.random() - 0.5) * 90;
+  const dy = (Math.random() - 0.5) * 90;
+  dodger.style.transform = `translate(${dx}px,${dy}px) rotate(${Math.random()*20-10}deg)`;
+});
+
+/* ============ RUNAWAY SUBMIT ============ */
+function runAway(e) {
+  const btn    = e.target;
+  const parent = btn.parentElement.getBoundingClientRect();
+  btn.style.right = 'auto';
+  btn.style.left   = (Math.random() * (parent.width - 80)) + 'px';
+  btn.style.bottom = (Math.random() * 80 - 80) + 'px';
+  bumpMeters(2, 3);
+}
+
+/* ============ FAKE LOGIN (wrong path) ============ */
+function fakeLogin() {
+  const email = document.getElementById('c-email').value;
+  if (email.toLowerCase().includes('e')) {
+    document.getElementById('email-error').classList.add('show');
+    bumpMeters(10, 8);
+    return;
+  }
+  randToast();
+  playSound('snd-sparrow');
+  bumpMeters(8, 10);
+}
+
+/* ============ REAL LOGIN (correct path) ============ */
+function realLogin() {
+  show('screen-success');
+  playSound('snd-chicken');
+  bumpMeters(15, 20);
+  setTimeout(() => triggerBSOD(), 2500);
+}
+
+function triggerBSOD() {
+  document.getElementById('bsod').classList.add('show');
+  const dismiss = () => {
+    document.getElementById('bsod').classList.remove('show');
+    show('screen-dashboard');
+    startTimer();
+    document.removeEventListener('keydown', dismiss);
+    document.getElementById('bsod').removeEventListener('click', dismiss);
+  };
+  setTimeout(() => {
+    document.addEventListener('keydown', dismiss);
+    document.getElementById('bsod').addEventListener('click', dismiss);
+  }, 1200);
+}
+
+/* ============ EMAIL 'e' LIVE DETECTOR ============ */
+document.getElementById('c-email').addEventListener('input', e => {
+  document.getElementById('email-error').classList.toggle('show', e.target.value.toLowerCase().includes('e'));
+});
+
+/* ============ DASHBOARD TIMER ============ */
+let _timerId;
+function startTimer() {
+  let s = 0;
+  const el = document.getElementById('timer');
+  clearInterval(_timerId);
+  _timerId = setInterval(() => { s++; if(el) el.textContent = s; }, 1000);
+}
+
+function goBackToCursed() {
+  clearInterval(_timerId);
+  show('screen-cursed');
+}
+
+/* ============ KONAMI CODE ============ */
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let kIdx = 0;
+document.addEventListener('keydown', e => {
+  if (e.key === KONAMI[kIdx]) { kIdx++; if (kIdx === KONAMI.length) { desiToast('SHAADI MODE UNLOCK! Dhol baja do — mehmaan aa rahe hain!'); kIdx = 0; } }
+  else { kIdx = 0; }
+  window._typed = ((window._typed || '') + (e.key||'')).slice(-10);
+  if (window._typed.toLowerCase().includes('admin')) {
+    desiToast('Bakra admin access mil gaya! Koi powers nahi. Mubarak ho.');
+    window._typed = '';
+  }
+});
+
+/* ============ HEADER DATE ============ */
+try { document.getElementById('hdate').textContent = new Date().toDateString(); } catch(e){}
+</script>
+</body>
+</html>
